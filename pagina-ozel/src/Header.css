@@ -45,11 +45,14 @@
     color: black;
     font-size: 16px;
     cursor: pointer;
-    padding: 0 10px;
+    padding: 10px 20px;
+    transition: background-color 0.3s ease;
   }
   
   .header-button:hover {
     text-decoration: underline;
+    transform: translateY(-1px);
+    background-color: #d5d8db;
   }
   
   .separator {
@@ -84,10 +87,13 @@
     color: white;
     font-size: 16px;
     cursor: pointer;
+    transition: background-color 0.3s ease;
   }
   
   .nav-button:hover {
     text-decoration: underline;
+    transform: translateY(-1px);
+    background-color: #2e2e2e;
   }
   
   .nav-button .fas {
