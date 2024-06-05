@@ -1,12 +1,21 @@
 import React from 'react';
-//import './App.css';
-import Header from './Header.jsx';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { Container } from '@mui/material';
+import Header from './Header';
+import Register from './Register';
+import Login from './Login';
 
 function App() {
   return (
-    <div className="App">
+    <Router>
       <Header />
-    </div>
+      <Container maxWidth="md" style={{ marginTop: '2rem' }}>
+        <Routes>
+          <Route path="/register" element={<Register />} />
+          <Route path="/login" element={<Login />} />
+        </Routes>
+      </Container>
+    </Router>
   );
 }
 
