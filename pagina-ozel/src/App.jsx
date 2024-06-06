@@ -1,21 +1,30 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { Container } from '@mui/material';
-import Header from './Header';
-import Register from './Register';
-import Login from './Login';
+import { AutentificacionProvider } from './componentes/AutentificacionProvider';
+import Navegacion from './componentes/Navegacion';
+import { ThemeProvider, createTheme } from '@mui/material/styles';
+
+
+const theme = createTheme({
+  typography: {
+    fontFamily: [
+      'Josefin Sans',
+      'Arial', // Fallback en caso de que 'Josefin Sans' no esté disponible
+      'sans-serif',
+    ].join(','),
+  },
+});
+
 
 function App() {
   return (
-    <Router>
-      <Header />
-      <Container maxWidth="md" style={{ marginTop: '2rem' }}>
-        <Routes>
-          <Route path="/register" element={<Register />} />
-          <Route path="/login" element={<Login />} />
-        </Routes>
-      </Container>
-    </Router>
+    <ThemeProvider theme={theme}>
+    <AutentificacionProvider>
+      <Router>
+        <Navegacion />
+      </Router>
+    </AutentificacionProvider>
+    </ThemeProvider>
   );
 }
 
