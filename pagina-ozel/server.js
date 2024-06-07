@@ -57,10 +57,36 @@ app.post('/api/usuarios/registro', async (req, res) => {
 
 // Ruta para el inicio de sesión
 app.post('/api/usuarios/login', (req, res) => {
-  const { correo, contraseña } = req.body;
-  // Aquí lógica para autenticar al usuario
+  const { Email, Password } = req.body;
 
-  res.status(200).json({ token: 'fake-jwt-token' });
+  // Validar datos de entrada
+  if (!Email || !Password) {
+    return res.status(400).json({ message: 'Todos los campos son obligatorios' });
+  }
+
+  // Verificar el usuario en la base de datos
+  const query = 'SELECT * FROM Usuarios WHERE Email = ?';
+  db.query(query, [Email], async (err, results) => {
+    if (err) {
+      console.error('Error verificando usuario en la base de datos:', err);
+      return res.status(500).json({ message: 'Error en el inicio de sesión' });
+    }
+
+    if (results.length === 0) {
+      return res.status(401).json({ message: 'Correo o contraseña incorrectos' });
+    }
+
+    const user = results[0];
+
+    // Comparar la contraseña ingresada con la contraseña hasheada en la base de datos
+    const isMatch = await bcrypt.compare(Password, user.Password);
+
+    if (!isMatch) {
+      return res.status(401).json({ message: 'Correo o contraseña incorrectos' });
+    }
+
+    res.status(200).json({ token: 'fake-jwt-token' });
+  });
 });
 
 app.listen(PORT, () => {

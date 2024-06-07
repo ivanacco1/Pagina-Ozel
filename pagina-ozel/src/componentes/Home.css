@@ -1,0 +1,34 @@
+/* Establecer el tamaño y la imagen de fondo */
+.home-container {
+    width: 100%;
+    height: 100vh;
+    background-image: url('/images/ozelhomefondo.webp'); /* Cambia esto por la ruta de tu imagen */
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+  }
+  
+/* Estilo del contenedor de texto */
+.text-overlay {
+    text-align: center;
+    margin-top: -150px; /* Ajustar la distancia vertical del texto */
+  }
+  
+  /* Estilo del título principal */
+  .main-title {
+    font-size: 96px;
+    color: white;
+    text-shadow: 2px 2px 4px black;
+    margin: 0;
+  }
+  
+  /* Estilo del subtítulo */
+  .sub-title {
+    font-size: 50px;
+    color: white;
+    text-shadow: 2px 2px 4px black;
+    margin: 0;
+  }

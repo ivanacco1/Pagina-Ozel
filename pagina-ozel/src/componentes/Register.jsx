@@ -14,7 +14,7 @@ function Register({ isOpen, onClose }) {
   const [confirmarContraseña, setConfirmarContraseña] = useState('');
   const [mostrarContraseña, setMostrarContraseña] = useState(false);
   const [error, setError] = useState(null);
-  const [registroExitoso, setRegistroExitoso] = useState(false); // Nuevo estado para el mensaje de éxito
+  const [registroExitoso, setRegistroExitoso] = useState(false);
 
   const handleMostrarContraseñaClick = () => {
     setMostrarContraseña(!mostrarContraseña);
@@ -51,12 +51,13 @@ function Register({ isOpen, onClose }) {
       });
 
       if (response.ok) {
-        setRegistroExitoso(true); // Establecer el estado de registro exitoso
+        setRegistroExitoso(true);
+        setError(null); // Limpiar el mensaje de error si lo hay
         setTimeout(() => {
-          setRegistroExitoso(false); // Después de 5 segundos, ocultar el mensaje de éxito y cerrar la ventana emergente
+          setRegistroExitoso(false);
           onClose();
           login(data); // Cambiar el estado a "logueado"
-        }, 3000);
+        }, 5000);
       } else {
         const errorData = await response.json();
         if (response.status === 400) {
@@ -79,7 +80,7 @@ function Register({ isOpen, onClose }) {
       <div className="modal-content">
         <h2>Crear Cuenta</h2>
         {error && <p className="error">{error}</p>}
-        {registroExitoso && <p className="success">¡Registro exitoso!</p>} {/* Mostrar el mensaje de éxito */}
+        {registroExitoso && <p className="success">¡Registro exitoso!</p>}
         <form onSubmit={handleSubmit}>
           <TextField
             fullWidth

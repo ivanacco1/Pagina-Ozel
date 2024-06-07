@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext } from 'react';
+import React, { createContext, useState, useContext, useEffect } from 'react';
 
 // Crear el contexto de autenticación
 const AuthContext = createContext();
@@ -7,7 +7,14 @@ const AuthContext = createContext();
 const AutentificacionProvider = ({ children }) => {
   const [usuario, setUsuario] = useState(null);
   const [estado, setEstado] = useState('deslogueado');
-  // Puede ser 'logueado' o 'deslogueado' inicialmente el usuario está deslogueado
+
+  useEffect(() => {
+    const usuarioGuardado = localStorage.getItem('usuario');
+    if (usuarioGuardado) {
+      setUsuario(JSON.parse(usuarioGuardado));
+      setEstado('logueado');
+    }
+  }, []);
 
   const login = (usuario) => {
     setUsuario(usuario);
@@ -17,6 +24,7 @@ const AutentificacionProvider = ({ children }) => {
   const logout = () => {
     setUsuario(null);
     setEstado('deslogueado');
+    localStorage.removeItem('usuario');
   };
 
   return (
@@ -26,11 +34,6 @@ const AutentificacionProvider = ({ children }) => {
   );
 };
 
-// Hook para usar el contexto de autenticación
-// Es un hook personalizado que en este caso devuelve el contexto
-// El objetivo es simplificar el uso de las funciones de autentificación
-// ya que es vez de tener que evocar useContext(AuthContext)
-// simplemente se usa useAuth
 const useAuth = () => useContext(AuthContext);
 
 export { AutentificacionProvider, useAuth };

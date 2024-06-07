@@ -63,15 +63,30 @@ body {
     color: black;
   }
   
-.header-bottom .search-bar {
-  padding: 5px;
-  font-size: 16px;
-  border: 1px solid #555; /* Cambiamos el color del borde a gris oscuro */
-  border-radius: 20px; /* Añadimos bordes redondeados */
-  flex-grow: 1;
-  max-width: 300px;
-  padding-left: 10px; /* Añadimos un pequeño espacio a la izquierda para el texto */
-}
+  .search-bar {
+    background-color: white;
+    border-radius: 20px;
+    margin: 5px 50px 5px!important; /* Margen superior e inferior */
+  }
+  
+  .search-bar .MuiOutlinedInput-root {
+    background-color: white;
+    border-radius: 20px;
+  }
+  
+  .search-bar .MuiOutlinedInput-notchedOutline {
+    border-color: #555; /* Color del borde */
+    border-width: 1px; /* Ancho del borde */
+    border-radius: 20px;
+  }
+  
+  .search-bar .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline {
+    border-color: #555; /* Mantener el color del borde al pasar el ratón */
+  }
+  
+  .search-bar .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+    border-color: #555; /* Mantener el color del borde al enfocar */
+  }
 
 /* Placeholder estilo */
 .header-bottom .search-bar::placeholder {
