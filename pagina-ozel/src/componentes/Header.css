@@ -1,13 +1,13 @@
 
 
-.header {
+/*.header {
     display: flex;
     flex-direction: column;
     width: 100%;
     position: fixed;
     top: 0;
     left: 0;
-  }
+  }*/ 
   
   .header-top {
     display: flex;
