@@ -42,12 +42,13 @@ function Login({ isOpen, onClose }) {
         setTimeout(() => {
           setLoginExitoso(false);
           onClose();
-          login(result); // Cambiar el estado a "logueado" con los datos del usuario
+          login(result.user); // Cambiar el estado a "logueado" con los datos del usuario
+          console.log(result);
         }, 3000);
 
         // Guardar el estado de la sesión en el almacenamiento local si la casilla está marcada
         if (mantenerSesion) {
-          localStorage.setItem('usuario', JSON.stringify(result));
+          localStorage.setItem('usuario', JSON.stringify(result.user));
         }
       } else {
         const errorData = await response.json();
@@ -117,4 +118,3 @@ function Login({ isOpen, onClose }) {
 }
 
 export default Login;
-

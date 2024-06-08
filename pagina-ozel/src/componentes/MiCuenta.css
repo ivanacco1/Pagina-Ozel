@@ -1,0 +1,92 @@
+.mi-cuenta-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    margin-top: 20px;
+    overflow-y: auto; /* Habilita el desplazamiento vertical */
+  }
+
+
+  
+  .mi-cuenta-box {
+    width: 100%;
+    max-width: 900px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .mi-cuenta-content {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .MuiCard-root {
+    background-color: #f5f5f5;
+    border-radius: 15px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s;
+  }
+  
+  .MuiCard-root:hover {
+    transform: translateY(-5px);
+  }
+  
+  .MuiCardContent-root {
+    padding: 20px;
+    text-align: center;
+  }
+  
+  @media (max-width: 600px) {
+    .MuiGrid-item {
+      padding: 0 10px;
+    }
+  
+    .mi-cuenta-button {
+      width: 100%;
+    }
+  }
+  
+  .tabs-centered .MuiTabs-flexContainer {
+    justify-content: center;
+  }
+
+  @media (min-width: 1200px) {
+    .mi-cuenta-box .mi-cuenta-content .MuiGrid-root .css-11l5t4l-MuiGrid-root{
+      max-width: 70%; 
+      flex-basis: 70%;
+    }
+  }
+
+  @media (min-width: 900px) {
+    .mi-cuenta-box .mi-cuenta-content .MuiGrid-root .css-11l5t4l-MuiGrid-root{
+      max-width: 70%; 
+      flex-basis: 70%;
+    }
+  }
+
+  @media (min-width: 600px) {
+    .mi-cuenta-box .mi-cuenta-content .MuiGrid-root .css-11l5t4l-MuiGrid-root{
+      max-width: 90%; 
+      flex-basis: 90%;
+    }
+  }
+
+  .mi-cuenta-content form {
+    margin-top: 20px; /* Agrega un margen superior al formulario */
+  }
+  
+  .mi-cuenta-content form > * {
+    margin-bottom: 15px; /* Agrega un margen inferior a los elementos del formulario */
+  }
+  
+  .mi-cuenta-content form > *:last-child {
+    margin-bottom: 0; /* Elimina el margen inferior del último elemento del formulario */
+  }
+  
+  .mi-cuenta-content {
+    overflow-y: auto; /* Habilita el desplazamiento vertical en caso de que el contenido exceda el tamaño del contenedor */
+  }

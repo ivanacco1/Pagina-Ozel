@@ -85,9 +85,54 @@ app.post('/api/usuarios/login', (req, res) => {
       return res.status(401).json({ message: 'Correo o contraseña incorrectos' });
     }
 
-    res.status(200).json({ token: 'fake-jwt-token' });
+    
+
+
+
+     // Enviar la información del usuario al frontend
+     const userData = {
+      UserId: user.AccountID,
+      FirstName: user.FirstName,
+      LastName: user.LastName,
+      Email: user.Email,
+      Role: user.Role,
+      Phone: user.Phone,
+      Address: user.Address,
+      City: user.City,
+      PostalCode: user.PostalCode
+    };
+
+
+    res.status(200).json({ token: 'fake-jwt-token', user: userData  });
   });
 });
+
+
+
+
+app.get('/api/usuarios/:id/pedidos', (req, res) => {
+  const userId = req.params.id;
+
+  // Obtener todos los pedidos del usuario por ID
+  const query = 'SELECT * FROM Pedidos WHERE Usuarios_AccountID = ? ORDER BY OrderDate DESC';
+  db.query(query, [userId], (err, results) => {
+    if (err) {
+      // Manejo de errores...
+    }
+
+      // Formatear la fecha en cada pedido
+      const formattedResults = results.map(result => {
+        return {
+          ...result,
+          OrderDate: result.OrderDate.toLocaleDateString().split('T')[0] // Formato día-mes-año
+        };
+      });
+  
+      res.status(200).json(formattedResults || []); // Enviar un array vacío si no hay pedidos
+
+  });
+});
+
 
 app.listen(PORT, () => {
   console.log(`Server escuchando en puerto ${PORT}`);

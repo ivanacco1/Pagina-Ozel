@@ -1,6 +1,4 @@
-body {
-  
-}
+
 
 .header {
     display: flex;
@@ -90,7 +88,7 @@ body {
 
 /* Placeholder estilo */
 .header-bottom .search-bar::placeholder {
-  color: #555; /* Cambiamos el color del placeholder a gris más claro */
+  color: #555; 
 }
   
   .nav-right {
@@ -116,4 +114,9 @@ body {
   
   .nav-button .fas {
     font-size: 20px;
+  }
+
+  .header-greeting {
+    font-size: 14px;
+    margin-right: 30px!important;
   }

@@ -7,6 +7,7 @@ import { AppBar, Toolbar, Typography, Button, TextField, IconButton, InputAdornm
 import SearchIcon from '@mui/icons-material/Search';
 import './Header.css';
 import Home from './Home';
+import MiCuenta from './MiCuenta';
 
 const Navegacion = () => {
   const { usuario, estado, logout } = useAuth();
@@ -20,7 +21,8 @@ const Navegacion = () => {
           <img src="/images/logo.png" alt="Logo" className="logo" />
         </Link>
         <div className="header-buttons">
-          {usuario && <Button className="header-button">MI CUENTA</Button>}
+          {usuario && <Typography variant="body1" className="header-greeting">Hola, {usuario.FirstName}</Typography>}
+          {usuario && <Button className="header-button" component={Link} to="/mi-cuenta">MI CUENTA</Button>}
           {!usuario && <Button className="header-button" onClick={() => setRegisterModalOpen(true)}>CREAR CUENTA</Button>}
           <span className="separator">|</span>
           {!usuario && <Button className="header-button" onClick={() => setLoginModalOpen(true)}>INICIAR SESION</Button>}
@@ -56,15 +58,9 @@ const Navegacion = () => {
         </div>
       </div>
       <Routes>
-      <Route path="/" element={<Home />} />
-        <Route
-          path="/login"
-          element={estado === 'logueado' ? <Navigate to="/" /> : <Login />}
-        />
-        <Route
-          path="/register"
-          element={estado === 'logueado' ? <Navigate to="/" /> : <Register />}
-        />
+        <Route path="/" element={<Home />} />
+
+        <Route path="/mi-cuenta" element={<MiCuenta />} />
       </Routes>
       <Register
         isOpen={isRegisterModalOpen}
