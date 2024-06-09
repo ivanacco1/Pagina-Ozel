@@ -73,7 +73,7 @@ app.post('/api/usuarios/login', (req, res) => {
     }
 
     if (results.length === 0) {
-      return res.status(401).json({ message: 'Correo o contraseña incorrectos' });
+      return res.status(403).json({ message: 'Correo o contraseña incorrectos' });
     }
 
     const user = results[0];
@@ -82,7 +82,7 @@ app.post('/api/usuarios/login', (req, res) => {
     const isMatch = await bcrypt.compare(Password, user.Password);
 
     if (!isMatch) {
-      return res.status(401).json({ message: 'Correo o contraseña incorrectos' });
+      return res.status(403).json({ message: 'Correo o contraseña incorrectos' });
     }
 
     
@@ -107,7 +107,6 @@ app.post('/api/usuarios/login', (req, res) => {
   });
 });
 
-
 //endpoint para modificar usuario
 app.put('/api/usuarios/:id', (req, res) => {
   const userId = req.params.id;
@@ -118,6 +117,44 @@ app.put('/api/usuarios/:id', (req, res) => {
     return res.status(400).json({ message: 'Todos los campos obligatorios deben ser proporcionados' });
   }
 
+  // Definir Función para actualizar el usuario
+  const updateUser = async (hashedPassword) => {
+    // Crear la consulta SQL para actualizar el usuario
+    let query = `UPDATE Usuarios SET FirstName = ?, LastName = ?, Email = ?, 
+                  ${hashedPassword ? 'Password = ?, ' : ''} Phone = ?, Address = ?, City = ?, PostalCode = ? 
+                  ${Role ? ', Role = ?' : ''} 
+                  WHERE AccountID = ?`;
+
+    const values = [FirstName, LastName, Email];
+    if (hashedPassword) {
+      values.push(hashedPassword);
+    }
+    values.push(Phone, Address, City, PostalCode);
+    if (Role) {
+      values.push(Role);
+    }
+    values.push(userId);
+
+    // Ejecutar la consulta SQL
+    db.query(query, values, (err, results) => {
+      if (err) {
+        console.error('Error actualizando el usuario en la base de datos:', err);
+        return res.status(501).json({ message: 'Error actualizando el usuario' });
+      }
+
+      // Consultar y devolver los datos actualizados del usuario
+      db.query('SELECT * FROM Usuarios WHERE AccountID = ?', [userId], (err, updatedUser) => {
+        if (err) {
+          console.error('Error obteniendo el usuario actualizado de la base de datos:', err);
+          return res.status(500).json({ message: 'Error obteniendo el usuario actualizado' });
+        }
+
+        res.status(200).json(updatedUser[0]);
+      });
+    });
+  };
+
+  console.log(userId);
   // Verificar si el correo electrónico ya está en uso por otro usuario
   const checkEmailQuery = 'SELECT * FROM Usuarios WHERE Email = ? AND AccountID != ?';
   db.query(checkEmailQuery, [Email, userId], (err, results) => {
@@ -127,45 +164,13 @@ app.put('/api/usuarios/:id', (req, res) => {
     }
 
     if (results.length > 0) {
-      return res.status(401).json({ message: 'El correo electrónico ya está en uso por otro usuario' });
+      return res.status(403).json({ message: 'El correo electrónico ya está en uso por otro usuario' });
     }
 
-    // Función para actualizar el usuario
-    const updateUser = async (hashedPassword) => {
-      // Crear la consulta SQL para actualizar el usuario
-      const query = `UPDATE Usuarios SET FirstName = ?, LastName = ?, Email = ?, 
-                    ${hashedPassword ? 'Password = ?, ' : ''} Phone = ?, Address = ?, City = ?, PostalCode = ? 
-                    WHERE AccountID = ?`;
-
-      const values = [FirstName, LastName, Email];
-      if (hashedPassword) {
-        values.push(hashedPassword);
-      }
-      values.push(Phone, Address, City, PostalCode, userId);
-
-      // Ejecutar la consulta SQL
-      db.query(query, values, (err, results) => {
-        if (err) {
-          console.error('Error actualizando el usuario en la base de datos:', err);
-          return res.status(501).json({ message: 'Error actualizando el usuario' });
-        }
-
-        // Consultar y devolver los datos actualizados del usuario
-        db.query('SELECT * FROM Usuarios WHERE AccountID = ?', [userId], (err, updatedUser) => {
-          if (err) {
-            console.error('Error obteniendo el usuario actualizado de la base de datos:', err);
-            return res.status(502).json({ message: 'Error obteniendo el usuario actualizado' });
-          }
-
-          res.status(200).json(updatedUser[0]);
-        });
-      });
-    };
-
-    // Verificar y encriptar la nueva contraseña si se proporciona
-    if (NewPassword) {
+    // Función de actualización de datos para usuarios
+    if (CurrentPassword) {
       // Obtener la contraseña actual del usuario de la base de datos
-      db.query('SELECT Password FROM Usuarios WHERE AccountID = ?', [userId], async (err, results) => {
+      db.query('SELECT Password, Email FROM Usuarios WHERE AccountID = ?', [userId], async (err, results) => {
         if (err) {
           console.error('Error obteniendo la contraseña actual del usuario:', err);
           return res.status(500).json({ message: 'Error obteniendo la contraseña actual del usuario' });
@@ -174,28 +179,31 @@ app.put('/api/usuarios/:id', (req, res) => {
         const user = results[0];
         const isPasswordCorrect = await bcrypt.compare(CurrentPassword, user.Password);
         if (!isPasswordCorrect) {
-          return res.status(400).json({ message: 'La contraseña actual es incorrecta' });
+          return res.status(403).json({ message: 'La contraseña actual es incorrecta' });
         }
 
-        // Encriptar la nueva contraseña
-        let hashedPassword;
-        try {
-          hashedPassword = await bcrypt.hash(NewPassword, 10);
-        } catch (err) {
-          console.error('Error encriptando la nueva contraseña:', err);
-          return res.status(500).json({ message: 'Error encriptando la nueva contraseña' });
-        }
+        // Verificar si hay nueva contraseña
+        if (NewPassword) {
+          let hashedPassword;
+          try {
+            hashedPassword = await bcrypt.hash(NewPassword, 10);
+          } catch (err) {
+            console.error('Error encriptando la nueva contraseña:', err);
+            return res.status(500).json({ message: 'Error encriptando la nueva contraseña' });
+          }
 
-        // Actualizar el usuario con la nueva contraseña
-        updateUser(hashedPassword);
+          // Actualizar el usuario con la nueva contraseña
+          updateUser(hashedPassword);
+        } else {
+          updateUser();
+        }
       });
     } else {
-      // Actualizar el usuario sin cambiar la contraseña
+      // Si no hay CurrentPassword, se asume que es una solicitud de cambio de datos para Admin
       updateUser();
     }
   });
 });
-
 
 
 

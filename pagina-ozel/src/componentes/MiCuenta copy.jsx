@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from './AutentificacionProvider';
-import { Typography, Container, Box, AppBar, Tabs, Tab, Grid, Card, CardContent, CircularProgress, TextField, Button, IconButton, InputAdornment } from '@mui/material';
+import { Typography, Container, Box, AppBar, Tabs, Tab, Grid, Card, CardContent, CircularProgress, TextField, Button } from '@mui/material';
 import './MiCuenta.css';
-import { ValidatePassword } from './ValidatePassword';
-import { Visibility, VisibilityOff } from '@mui/icons-material';
 
 const MiCuenta = () => {
   const { usuario } = useAuth();
@@ -12,7 +10,6 @@ const MiCuenta = () => {
   const [loading, setLoading] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [changePasswordMode, setChangePasswordMode] = useState(false);
-  const [mostrarContraseña, setMostrarContraseña] = useState(false);
   const [formData, setFormData] = useState({
     FirstName: '',
     LastName: '',
@@ -25,11 +22,6 @@ const MiCuenta = () => {
     NewPassword: '',
     ConfirmPassword: ''
   });
-
-  const handleMostrarContraseñaClick = () => {
-    setMostrarContraseña(!mostrarContraseña);
-  };
-
 
   useEffect(() => {
     if (usuario) {
@@ -56,7 +48,7 @@ const MiCuenta = () => {
 
   const handleTabChange = (event, newValue) => {
     setSelectedTab(newValue);
-    if (newValue === 1) {
+    if (newValue === 2) {
       cargarHistorialCompras();
     }
   };
@@ -64,7 +56,7 @@ const MiCuenta = () => {
   const cargarHistorialCompras = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`http://localhost:5000/api/usuarios/${usuario.UserId}/pedidos`);
+      const response = await fetch(`http://localhost:5000/api/usuarios/${usuario.AccountID}/pedidos`);
       if (response.ok) {
         const data = await response.json();
         setHistorialCompras(data);
@@ -118,11 +110,6 @@ const MiCuenta = () => {
         alert('Las nuevas contraseñas no coinciden.');
         return;
       }
-
-      if (!ValidatePassword(formData.NewPassword)) {
-        setError('La contraseña debe tener al menos 6 caracteres, una letra mayúscula, una letra minúscula, un número y un carácter especial.');
-        return;
-      }
     }
 
     const updateData = {
@@ -131,7 +118,7 @@ const MiCuenta = () => {
     };
 
     try {
-      const response = await fetch(`http://localhost:5000/api/usuarios/${usuario.UserId}`, {
+      const response = await fetch(`http://localhost:5000/api/usuarios/${usuario.AccountID}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -175,6 +162,7 @@ const MiCuenta = () => {
             className="tabs-centered"
           >
             <Tab label="Resumen" />
+            <Tab label="Modificar Datos" />
             <Tab label="Historial de Compras" />
             {usuario.Role === 'admin' && <Tab label="Gestor de Productos" />}
             {usuario.Role === 'admin' && <Tab label="Gestor de Cuentas" />}
@@ -285,27 +273,18 @@ const MiCuenta = () => {
                     className="MuiTextField-root"
                     label="Nueva Contraseña"
                     name="NewPassword"
-                    type={mostrarContraseña ? 'text' : 'password'}
+                    type="password"
                     value={formData.NewPassword}
                     onChange={handleInputChange}
                     fullWidth
                     margin="normal"
                     InputLabelProps={{ shrink: true }}
-                    InputProps={{
-                      endAdornment: (
-                        <InputAdornment position="end">
-                          <IconButton onClick={handleMostrarContraseñaClick} style={{ backgroundColor: 'white', outline: 'none' }} disableFocusRipple>
-                            {mostrarContraseña ? <VisibilityOff /> : <Visibility />}
-                          </IconButton>
-                        </InputAdornment>
-                      ),
-                    }}
                   />
                   <TextField
                     className="MuiTextField-root"
                     label="Confirmar Nueva Contraseña"
                     name="ConfirmPassword"
-                   type={mostrarContraseña ? 'text' : 'password'}
+                    type="password"
                     value={formData.ConfirmPassword}
                     onChange={handleInputChange}
                     fullWidth
@@ -342,8 +321,12 @@ const MiCuenta = () => {
               </Box>
             </>
           )}
-
           {selectedTab === 1 && (
+            <>
+              {/* Puedes mover el contenido de modificar datos aquí si lo prefieres */}
+            </>
+          )}
+          {selectedTab === 2 && (
             <>
               <Typography variant="h5" gutterBottom mt={4}>Historial de Compras</Typography>
               {loading ? (
