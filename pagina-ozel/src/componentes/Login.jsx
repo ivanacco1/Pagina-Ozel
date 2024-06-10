@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './Modal.css';
 import { TextField, Button, IconButton, InputAdornment, Checkbox, FormControlLabel } from '@mui/material';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import { useAuth } from './AutentificacionProvider';
+import axios from 'axios';
 
 function Login({ isOpen, onClose }) {
   const { login } = useAuth();
@@ -27,23 +28,16 @@ function Login({ isOpen, onClose }) {
     };
 
     try {
-      const response = await fetch('http://localhost:5000/api/usuarios/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      });
+      const response = await axios.post('http://localhost:5000/api/usuarios/login', data);
 
-      if (response.ok) {
-        const result = await response.json();
+      if (response.status === 200) {
+        const result = response.data;
         setLoginExitoso(true);
         setError(null);
         setTimeout(() => {
           setLoginExitoso(false);
           onClose();
           login(result.user); // Cambiar el estado a "logueado" con los datos del usuario
-          console.log(result);
         }, 3000);
 
         // Guardar el estado de la sesión en el almacenamiento local si la casilla está marcada
@@ -51,7 +45,7 @@ function Login({ isOpen, onClose }) {
           localStorage.setItem('usuario', JSON.stringify(result.user));
         }
       } else {
-        const errorData = await response.json();
+        const errorData = response.data;
         if (response.status === 400 || response.status === 401) {
           setError(errorData.message || 'Credenciales incorrectas');
         } else {
@@ -62,6 +56,18 @@ function Login({ isOpen, onClose }) {
       setError('Error de red');
     }
   };
+
+  // Restablecer los campos del formulario cuando el modal se cierra
+  useEffect(() => {
+    if (!isOpen) {
+      setEmail('');
+      setPassword('');
+      setMostrarPassword(false);
+      setMantenerSesion(false);
+      setError(null);
+      setLoginExitoso(false);
+    }
+  }, [isOpen]);
 
   if (!isOpen) return null;
 

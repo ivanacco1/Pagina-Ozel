@@ -1,39 +1,36 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
+import React, { createContext, useContext, useState } from 'react';
 
-// Crear el contexto de autenticación
 const AuthContext = createContext();
 
-// Proveedor del contexto de autenticación
-const AutentificacionProvider = ({ children }) => {
+export const useAuth = () => useContext(AuthContext);
+
+export const AutentificacionProvider = ({ children }) => {
   const [usuario, setUsuario] = useState(null);
-  const [estado, setEstado] = useState('deslogueado');
+  const [estado, setEstado] = useState('idle');
 
-  useEffect(() => {
-    const usuarioGuardado = localStorage.getItem('usuario');
-    if (usuarioGuardado) {
-      setUsuario(JSON.parse(usuarioGuardado));
-      setEstado('logueado');
-    }
-  }, []);
-
-  const login = (usuario) => {
-    setUsuario(usuario);
-    setEstado('logueado');
+  const login = (userData) => {
+    setUsuario(userData);
+    //console.log("login",userData);
+    localStorage.setItem('usuario', JSON.stringify(userData));
   };
 
   const logout = () => {
     setUsuario(null);
-    setEstado('deslogueado');
     localStorage.removeItem('usuario');
   };
 
+  const actualizarUsuario = (updatedUserData) => {
+    setUsuario(updatedUserData);
+    localStorage.setItem('usuario', JSON.stringify(updatedUserData));
+  };
+
   return (
-    <AuthContext.Provider value={{ usuario, estado, login, logout }}>
+    <AuthContext.Provider value={{ usuario, estado, login, logout, actualizarUsuario }}>
       {children}
     </AuthContext.Provider>
   );
 };
 
-const useAuth = () => useContext(AuthContext);
+//const useAuth = () => useContext(AuthContext);
 
-export { AutentificacionProvider, useAuth };
+//export { AutentificacionProvider, useAuth };

@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './Modal.css';
 import { ValidatePassword } from './ValidatePassword';
 import { TextField, Button, IconButton, InputAdornment } from '@mui/material';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import { useAuth } from './AutentificacionProvider';
+import axios from 'axios';
 
 function Register({ isOpen, onClose }) {
   const { login } = useAuth();
@@ -42,24 +43,23 @@ function Register({ isOpen, onClose }) {
     };
 
     try {
-      const response = await fetch('http://localhost:5000/api/usuarios/registro', {
-        method: 'POST',
+      const response = await axios.post('http://localhost:5000/api/usuarios/registro', data, {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(data),
       });
 
-      if (response.ok) {
+      if (response.status === 200) {
+        const result = response.data;
         setRegistroExitoso(true);
         setError(null); // Limpiar el mensaje de error si lo hay
         setTimeout(() => {
           setRegistroExitoso(false);
           onClose();
-          login(data); // Cambiar el estado a "logueado"
+          login(result.user);  // Cambiar el estado a "logueado"
         }, 5000);
       } else {
-        const errorData = await response.json();
+        const errorData = response.data;
         if (response.status === 400) {
           setError(errorData.message || 'Error al registrar la cuenta');
         } else if (response.status === 500) {
@@ -69,9 +69,34 @@ function Register({ isOpen, onClose }) {
         }
       }
     } catch (err) {
-      setError('Error de red');
+      if (err.response) {
+        const errorData = err.response.data;
+        if (err.response.status === 400) {
+          setError(errorData.message || 'Error al registrar la cuenta');
+        } else if (err.response.status === 500) {
+          setError('Error, el email ya está en uso.');
+        } else {
+          setError('Error al registrar la cuenta. Intente nuevamente más tarde.');
+        }
+      } else {
+        setError('Error de red');
+      }
     }
   };
+
+  // Restablecer los campos del formulario cuando el modal se cierra
+  useEffect(() => {
+    if (!isOpen) {
+      setNombre('');
+      setApellido('');
+      setCorreo('');
+      setContraseña('');
+      setConfirmarContraseña('');
+      setMostrarContraseña(false);
+      setError(null);
+      setRegistroExitoso(false);
+    }
+  }, [isOpen]);
 
   if (!isOpen) return null;
 

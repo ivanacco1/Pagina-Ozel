@@ -1,5 +1,7 @@
+// Navegacion.jsx
+
 import React, { useState } from 'react';
-import { Routes, Route, Link, Navigate } from 'react-router-dom';
+import { Routes, Route, Link } from 'react-router-dom';
 import { useAuth } from './AutentificacionProvider';
 import Login from './Login';
 import Register from './Register';
@@ -59,7 +61,7 @@ const Navegacion = () => {
           </div>
         </div>
       </div>
-      <div style={{ marginTop: '110px' }}> {/* Ajustar el margen superior según sea necesario */}
+      <div style={{ marginTop: '110px' }}>
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/mi-cuenta" element={<MiCuenta />} />

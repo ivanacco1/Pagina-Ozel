@@ -27,6 +27,24 @@ db.connect(err => {
   console.log('Conectado a la base de datos MySQL');
 });
 
+
+// Función para crear userData
+const createUserData = (user) => {
+  return {
+    UserId: user.AccountID,
+    FirstName: user.FirstName,
+    LastName: user.LastName,
+    Email: user.Email,
+    Role: user.Role,
+    Phone: user.Phone,
+    Address: user.Address,
+    City: user.City,
+    PostalCode: user.PostalCode
+  };
+};
+
+
+
 // Ruta para el registro de usuarios
 app.post('/api/usuarios/registro', async (req, res) => {
   const { nombre, apellido, correo, contraseña } = req.body;
@@ -47,13 +65,36 @@ app.post('/api/usuarios/registro', async (req, res) => {
         console.error('Error insertando usuario en la base de datos:', err);
         return res.status(500).json({ message: 'Error registrando el usuario' });
       }
-      res.status(200).json({ message: 'Usuario registrado exitosamente!' });
+
+      // Obtener el ID del usuario recién creado
+      const userId = results.insertId;
+
+      // Consultar los datos del usuario recién creado
+      db.query('SELECT * FROM Usuarios WHERE AccountID = ?', [userId], (err, userResults) => {
+        if (err) {
+          console.error('Error obteniendo el usuario registrado de la base de datos:', err);
+          return res.status(500).json({ message: 'Error obteniendo el usuario registrado' });
+        }
+
+        const user = userResults[0];
+
+        
+
+       // Enviar los datos del usuario al frontend
+       const userData = createUserData(user)
+
+        res.status(200).json({ message: 'Usuario registrado exitosamente!', user: userData });
+      });
     });
   } catch (error) {
     console.error('Error generando hash de contraseña:', error);
     return res.status(500).json({ message: 'Error registrando el usuario' });
   }
 });
+
+
+
+
 
 // Ruta para el inicio de sesión
 app.post('/api/usuarios/login', (req, res) => {
@@ -64,8 +105,14 @@ app.post('/api/usuarios/login', (req, res) => {
     return res.status(400).json({ message: 'Todos los campos son obligatorios' });
   }
 
+
+
+
+
   // Verificar el usuario en la base de datos
   const query = 'SELECT * FROM Usuarios WHERE Email = ?';
+
+
   db.query(query, [Email], async (err, results) => {
     if (err) {
       console.error('Error verificando usuario en la base de datos:', err);
@@ -89,19 +136,9 @@ app.post('/api/usuarios/login', (req, res) => {
 
 
 
-     // Enviar la información del usuario al frontend
-     const userData = {
-      UserId: user.AccountID,
-      FirstName: user.FirstName,
-      LastName: user.LastName,
-      Email: user.Email,
-      Role: user.Role,
-      Phone: user.Phone,
-      Address: user.Address,
-      City: user.City,
-      PostalCode: user.PostalCode
-    };
-
+       // Enviar los datos del usuario al frontend
+       const userData = createUserData(user)
+      //console.log(user);
 
     res.status(200).json({ token: 'fake-jwt-token', user: userData  });
   });
@@ -149,7 +186,10 @@ app.put('/api/usuarios/:id', (req, res) => {
           return res.status(500).json({ message: 'Error obteniendo el usuario actualizado' });
         }
 
-        res.status(200).json(updatedUser[0]);
+               // Enviar los datos del usuario al frontend
+               const userData = createUserData(updatedUser[0])
+
+        res.status(200).json( {message: 'Usuario actualizado exitosamente!', user: userData });
       });
     });
   };
