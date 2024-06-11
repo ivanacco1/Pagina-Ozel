@@ -4,9 +4,10 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "npm-run-all --parallel vite api_usuarios",
+    "dev": "npm-run-all --parallel vite api_usuarios api_productos",
     "vite": "vite",
-    "api_usuarios": "node server.js",
+    "api_usuarios": "node cuentas.js",
+    "api_productos": "node productos.js",
     "build": "vite build",
     "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview"

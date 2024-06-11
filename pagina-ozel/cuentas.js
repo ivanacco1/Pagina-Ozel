@@ -24,7 +24,7 @@ db.connect(err => {
     console.error('Error conectando a la base de datos:', err);
     return;
   }
-  console.log('Conectado a la base de datos MySQL');
+  console.log('API de Cuentas Conectado a la base de datos MySQL');
 });
 
 
@@ -310,7 +310,21 @@ app.put('/api/usuarios/:id', (req, res) => {
         if (!isPasswordCorrect) {
           return res.status(403).json({ message: 'La contraseña actual es incorrecta' });
         }
+        
+        if (NewPassword) {
+          let hashedPassword;
+          try {
+            hashedPassword = await bcrypt.hash(NewPassword, 10);
+          } catch (err) {
+            console.error('Error encriptando la nueva contraseña:', err);
+            return res.status(500).json({ message: 'Error encriptando la nueva contraseña' });
+          }
+          updateUser2(hashedPassword);
+        } else{
           updateUser2();
+        }
+          
+          
       });
     }
   });
@@ -370,20 +384,71 @@ app.get('/api/usuarios/:id/pedidos', (req, res) => {
   });
 });
 
-// Endpoint para obtener todos los productos
-app.get('/api/productos', (req, res) => {
-  const query = 'SELECT * FROM Productos';
 
-  db.query(query, (err, results) => {
-    if (err) {
-      console.error('Error al obtener productos:', err);
-      return res.status(500).json({ message: 'Error al obtener productos' });
-    }
+// Endpoint para eliminar usuario
+app.delete('/api/usuarios/:id', async (req, res) => {
+  const adminId = req.params.id;
+  const { AdminPassword, TargetID } = req.body;
 
-    res.status(200).json(results);
-  });
+  // Verificar que todos los datos necesarios están presentes
+  if (!AdminPassword || !TargetID) {
+    return res.status(400).json({ message: 'AdminPassword y TargetID son obligatorios' });
+  }
+
+  try {
+    // Obtener la contraseña del administrador de la base de datos
+    const query = 'SELECT Password, Role FROM Usuarios WHERE AccountID = ?';
+    db.query(query, [adminId], async (err, results) => {
+      if (err) {
+        console.error('Error obteniendo datos del administrador de la base de datos:', err);
+        return res.status(500).json({ message: 'Error verificando la identidad del administrador' });
+      }
+
+      if (results.length === 0) {
+        return res.status(404).json({ message: 'Administrador no encontrado' });
+      }
+
+      const admin = results[0];
+
+      // Verificar que el usuario es administrador
+      if (admin.Role !== 'admin') {
+        return res.status(403).json({ message: 'Solo los administradores pueden eliminar usuarios' });
+      }
+
+      // Comparar la contraseña ingresada con la contraseña hasheada en la base de datos
+      const isMatch = await bcrypt.compare(AdminPassword, admin.Password);
+
+      if (!isMatch) {
+        return res.status(403).json({ message: 'Contraseña de administrador incorrecta' });
+      }
+
+      // Eliminar el usuario especificado por TargetID
+      const deleteQuery = 'DELETE FROM Usuarios WHERE AccountID = ?';
+      db.query(deleteQuery, [TargetID], (err, results) => {
+        if (err) {
+          console.error('Error eliminando el usuario de la base de datos:', err);
+          return res.status(500).json({ message: 'Error eliminando el usuario' });
+        }
+
+        // Si no se eliminó ningún usuario, significa que el TargetID no existe
+        if (results.affectedRows === 0) {
+          return res.status(404).json({ message: 'Usuario no encontrado' });
+        }
+
+        res.status(204).send(); // Responder con 204 No Content si se elimina correctamente
+      });
+    });
+  } catch (error) {
+    console.error('Error en el proceso de eliminación de usuario:', error);
+    return res.status(500).json({ message: 'Error eliminando el usuario' });
+  }
 });
 
+
+
+
+
+
 app.listen(PORT, () => {
-  console.log(`Server escuchando en puerto ${PORT}`);
+  console.log(`API de cuentas escuchando en puerto ${PORT}`);
 });

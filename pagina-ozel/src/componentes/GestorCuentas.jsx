@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { CircularProgress, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography, TextField, FormControl, InputLabel, Select, MenuItem, Button, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
+import { CircularProgress, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography, TextField, FormControl, InputLabel, Select, MenuItem, Button, Dialog, DialogTitle, DialogContent, DialogActions, IconButton } from '@mui/material';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
 import axios from 'axios';
 import { useAuth } from './AutentificacionProvider';
 import '../estilos/GestorCuentas.css';
@@ -13,6 +15,9 @@ const GestorCuentas = () => {
   const [newRole, setNewRole] = useState('');
   const [adminPassword, setAdminPassword] = useState('');
   const [openConfirmationDialog, setOpenConfirmationDialog] = useState(false);
+  const [openResetDialog, setOpenResetDialog] = useState(false);
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const [resetPassword, setResetPassword] = useState('');
 
   useEffect(() => {
     cargarUsuarios();
@@ -32,7 +37,6 @@ const GestorCuentas = () => {
       console.error('Error al cargar la lista de usuarios:', error.message);
     } finally {
       setLoading(false);
-
     }
   };
 
@@ -52,7 +56,6 @@ const GestorCuentas = () => {
 
   const handleConfirmChange = async () => {
     setOpenConfirmationDialog(false);
-    console.log(usuario.UserId, newRole, adminPassword, selectedUser.AccountID);
     try {
       const response = await axios.put(`http://localhost:5000/api/usuarios/${usuario.UserId}`, {
         Role: newRole,
@@ -60,7 +63,6 @@ const GestorCuentas = () => {
         TargetID: selectedUser.AccountID
       });
       if (response.status === 200) {
-        // Actualizar lista de usuarios
         cargarUsuarios();
         alert('Rol de usuario actualizado correctamente.');
       } else {
@@ -82,6 +84,86 @@ const GestorCuentas = () => {
     setSelectedUser(null);
     setNewRole('');
     setAdminPassword('');
+  };
+
+  const generateRandomPassword = () => {
+    const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+~`|}{[]:;?><,./-=";
+    let password = '';
+    for (let i = 0; i < 8; i++) {
+      password += charset[Math.floor(Math.random() * charset.length)];
+    }
+    return password;
+  };
+
+  const handleResetPasswordClick = (user) => {
+    setSelectedUser(user);
+    setResetPassword(generateRandomPassword());
+    setOpenResetDialog(true);
+  };
+
+  const handleConfirmResetPassword = async () => {
+    try {
+      const response = await axios.put(`http://localhost:5000/api/usuarios/${usuario.UserId}`, {
+        NewPassword: resetPassword,
+        AdminPassword: adminPassword,
+        TargetID: selectedUser.AccountID
+      });
+      if (response.status === 200) {
+        alert(`Contraseña restablecida. La nueva contraseña es: ${resetPassword}`);
+      } else {
+        console.error('Error al restablecer la contraseña del usuario:', response.statusText);
+        alert('Error al restablecer la contraseña del usuario.');
+      }
+    } catch (error) {
+      console.error('Error al restablecer la contraseña del usuario:', error.message);
+      alert('Error al restablecer la contraseña del usuario.');
+    } finally {
+      setSelectedUser(null);
+      setAdminPassword('');
+      setOpenResetDialog(false);
+    }
+  };
+
+  const handleCancelResetPassword = () => {
+    setSelectedUser(null);
+    setAdminPassword('');
+    setOpenResetDialog(false);
+  };
+
+  const handleDeleteUserClick = (user) => {
+    setSelectedUser(user);
+    setOpenDeleteDialog(true);
+  };
+
+  const handleConfirmDeleteUser = async () => {
+    try {
+      const response = await axios.delete(`http://localhost:5000/api/usuarios/${usuario.UserId}`, {
+        data: {
+          AdminPassword: adminPassword,
+          TargetID: selectedUser.AccountID
+        }
+      });
+      if (response.status === 204) {
+        alert('Usuario eliminado correctamente.');
+        cargarUsuarios();
+      } else {
+        console.error('Error al eliminar el usuario:', response.statusText);
+        alert('Error al eliminar el usuario.');
+      }
+    } catch (error) {
+      console.error('Error al eliminar el usuario:', error.message);
+      alert('Error al eliminar el usuario.');
+    } finally {
+      setSelectedUser(null);
+      setAdminPassword('');
+      setOpenDeleteDialog(false);
+    }
+  };
+
+  const handleCancelDeleteUser = () => {
+    setSelectedUser(null);
+    setAdminPassword('');
+    setOpenDeleteDialog(false);
   };
 
   const filteredUsuarios = usuarios.filter((user) =>
@@ -110,7 +192,7 @@ const GestorCuentas = () => {
         <CircularProgress />
       ) : (
         <>
-          <TableContainer component={Paper} style={{ maxWidth: '100%' }}>
+          <TableContainer component={Paper} style={{ width: '100%', overflowX: 'auto' }}>
             <Table>
               <TableHead>
                 <TableRow>
@@ -124,6 +206,8 @@ const GestorCuentas = () => {
                   <TableCell>Ciudad</TableCell>
                   <TableCell>Código Postal</TableCell>
                   <TableCell>Fecha de registro</TableCell>
+                  <TableCell>Restablecer Contraseña</TableCell>
+                  <TableCell>Borrar Cuenta</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -137,9 +221,9 @@ const GestorCuentas = () => {
                       <FormControl variant="standard" fullWidth>
                         <InputLabel id={`rol-label-${user.UserId}`} shrink={false}></InputLabel>
                         <Select
-                        MenuProps={{
-                          disableScrollLock: true,
-                        }}
+                          MenuProps={{
+                            disableScrollLock: true,
+                          }}
                           labelId={`rol-label-${user.UserId}`}
                           id={`rol-select-${user.UserId}`}
                           value={user.Role}
@@ -158,11 +242,28 @@ const GestorCuentas = () => {
                     <TableCell>{user.City}</TableCell>
                     <TableCell>{user.PostalCode}</TableCell>
                     <TableCell>{user.DateRegistered}</TableCell>
+                    <TableCell>
+                      <IconButton 
+                        color="secondary" 
+                        onClick={() => handleResetPasswordClick(user)}
+                      >
+                        <EditIcon />
+                      </IconButton>
+                    </TableCell>
+                    <TableCell>
+                      <IconButton 
+                        color="error" 
+                        onClick={() => handleDeleteUserClick(user)}
+                      >
+                        <DeleteIcon />
+                      </IconButton>
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
             </Table>
           </TableContainer>
+          {/* Dialogo para cambiar rol */}
           <Dialog open={openConfirmationDialog} onClose={handleCancelChange}>
             <DialogTitle>Confirmar Cambio de Rol</DialogTitle>
             <DialogContent>
@@ -180,6 +281,47 @@ const GestorCuentas = () => {
             <DialogActions>
               <Button onClick={handleCancelChange} color="primary">Cancelar</Button>
               <Button onClick={handleConfirmChange} color="primary" variant="contained">Confirmar</Button>
+            </DialogActions>
+          </Dialog>
+          {/* Dialogo para restablecer contraseña */}
+          <Dialog open={openResetDialog} onClose={handleCancelResetPassword}>
+            <DialogTitle>Confirmar Restablecimiento de Contraseña</DialogTitle>
+            <DialogContent>
+              <Typography variant="body1">Por favor, introduce la contraseña de administrador para confirmar el restablecimiento de la contraseña para el usuario {selectedUser ? selectedUser.UserId : ''}:</Typography>
+              <TextField
+                label="Contraseña de Administrador"
+                type="password"
+                variant="outlined"
+                fullWidth
+                margin="normal"
+                value={adminPassword}
+                onChange={(e) => setAdminPassword(e.target.value)}
+              />
+              <Typography variant="body1" mt={2}>Nueva contraseña: {resetPassword}</Typography>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={handleCancelResetPassword} color="primary">Cancelar</Button>
+              <Button onClick={handleConfirmResetPassword} color="primary" variant="contained">Confirmar</Button>
+            </DialogActions>
+          </Dialog>
+          {/* Dialogo para borrar cuenta */}
+          <Dialog open={openDeleteDialog} onClose={handleCancelDeleteUser}>
+            <DialogTitle>Confirmar Eliminación de Cuenta</DialogTitle>
+            <DialogContent>
+              <Typography variant="body1">Por favor, introduce la contraseña de administrador para confirmar la eliminación de la cuenta para el usuario {selectedUser ? selectedUser.UserId : ''}:</Typography>
+              <TextField
+                label="Contraseña de Administrador"
+                type="password"
+                variant="outlined"
+                fullWidth
+                margin="normal"
+                value={adminPassword}
+                onChange={(e) => setAdminPassword(e.target.value)}
+              />
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={handleCancelDeleteUser} color="primary">Cancelar</Button>
+              <Button onClick={handleConfirmDeleteUser} color="primary" variant="contained">Confirmar</Button>
             </DialogActions>
           </Dialog>
         </>
