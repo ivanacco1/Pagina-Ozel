@@ -370,6 +370,19 @@ app.get('/api/usuarios/:id/pedidos', (req, res) => {
   });
 });
 
+// Endpoint para obtener todos los productos
+app.get('/api/productos', (req, res) => {
+  const query = 'SELECT * FROM Productos';
+
+  db.query(query, (err, results) => {
+    if (err) {
+      console.error('Error al obtener productos:', err);
+      return res.status(500).json({ message: 'Error al obtener productos' });
+    }
+
+    res.status(200).json(results);
+  });
+});
 
 app.listen(PORT, () => {
   console.log(`Server escuchando en puerto ${PORT}`);
