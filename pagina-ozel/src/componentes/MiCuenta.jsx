@@ -3,9 +3,10 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from './AutentificacionProvider';
 import { Typography, Container, Box, AppBar, Tabs, Tab, Grid, Card, CardContent, CircularProgress, TextField, Button, IconButton, InputAdornment } from '@mui/material';
-import './MiCuenta.css';
+import '../estilos/MiCuenta.css';
 import Resumen from './Resumen';
 import HistorialCompras from './HistorialCompras';
+import GestorCuentas from './GestorCuentas';
 
 const MiCuenta = () => {
   const { usuario, actualizarUsuario } = useAuth();
@@ -22,8 +23,13 @@ const MiCuenta = () => {
 
   const handleTabChange = (event, newValue) => {
     setSelectedTab(newValue);
-    if (newValue === 1) {
+   /* if (newValue === 1) {
     }
+    if (newValue === 3) {  // Tab index for "Gestor de Cuentas"
+      setLoading(true);
+      // Logic to load data if needed
+      setLoading(false);
+    }*/
   };
 
 
@@ -65,6 +71,7 @@ const MiCuenta = () => {
              <HistorialCompras />
             </>
           )}
+          {selectedTab === 3 && ( <GestorCuentas />)}
         </Box>
       </Box>
     </Container>

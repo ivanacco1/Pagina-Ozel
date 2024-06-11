@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import './Modal.css';
+import '../estilos/Modal.css';
 import { ValidatePassword } from './ValidatePassword';
 import { TextField, Button, IconButton, InputAdornment } from '@mui/material';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import { useAuth } from './AutentificacionProvider';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom'; 
 
 function Register({ isOpen, onClose }) {
   const { login } = useAuth();
@@ -16,6 +17,7 @@ function Register({ isOpen, onClose }) {
   const [mostrarContraseña, setMostrarContraseña] = useState(false);
   const [error, setError] = useState(null);
   const [registroExitoso, setRegistroExitoso] = useState(false);
+  const navigate = useNavigate(); // Inicializa useNavigate
 
   const handleMostrarContraseñaClick = () => {
     setMostrarContraseña(!mostrarContraseña);
@@ -57,7 +59,8 @@ function Register({ isOpen, onClose }) {
           setRegistroExitoso(false);
           onClose();
           login(result.user);  // Cambiar el estado a "logueado"
-        }, 5000);
+          navigate('/'); // Redirige a la página de inicio
+        }, 3000);
       } else {
         const errorData = response.data;
         if (response.status === 400) {

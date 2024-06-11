@@ -7,7 +7,7 @@ import Login from './Login';
 import Register from './Register';
 import { AppBar, Toolbar, Typography, Button, TextField, IconButton, InputAdornment } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
-import './Header.css';
+import '../estilos/Header.css';
 import Home from './Home';
 import MiCuenta from './MiCuenta';
 

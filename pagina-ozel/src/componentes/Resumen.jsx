@@ -3,7 +3,7 @@ import { Grid, TextField, Button, Box, Typography, IconButton, InputAdornment } 
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import { useAuth } from './AutentificacionProvider';
 import { ValidatePassword } from './ValidatePassword';
-import './MiCuenta.css';
+import '../estilos/MiCuenta.css';
 import axios from 'axios';
 
 const Resumen = () => {

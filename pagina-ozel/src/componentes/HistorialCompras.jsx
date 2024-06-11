@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Grid, Card, CardContent, Typography, CircularProgress } from '@mui/material';
 import { useAuth } from './AutentificacionProvider';
-import './MiCuenta.css';
+import '../estilos/MiCuenta.css';
 import axios from 'axios';
 
 const HistorialCompras = () => {

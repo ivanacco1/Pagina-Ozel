@@ -21,7 +21,7 @@
   position: fixed; /* Añadir posición fija */
   top: 0;
   width: 100%;
-  z-index: 1;
+  z-index: 10;
 }
 
 .header-bottom {
@@ -35,7 +35,7 @@
   position: fixed; /* Añadir posición fija */
   top: 60px; /* Ajustar para estar debajo del header-top */
   width: 100%;
-  z-index: 1;
+  z-index: 10;
 }
 
 .logo {

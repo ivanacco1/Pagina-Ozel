@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import './Modal.css';
+import '../estilos/Modal.css';
 import { TextField, Button, IconButton, InputAdornment, Checkbox, FormControlLabel } from '@mui/material';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import { useAuth } from './AutentificacionProvider';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom'; 
 
 function Login({ isOpen, onClose }) {
   const { login } = useAuth();
@@ -13,6 +14,7 @@ function Login({ isOpen, onClose }) {
   const [mantenerSesion, setMantenerSesion] = useState(false);
   const [error, setError] = useState(null);
   const [loginExitoso, setLoginExitoso] = useState(false);
+  const navigate = useNavigate(); // Inicializa useNavigate
 
   const handleMostrarPasswordClick = () => {
     setMostrarPassword(!mostrarPassword);
@@ -38,6 +40,7 @@ function Login({ isOpen, onClose }) {
           setLoginExitoso(false);
           onClose();
           login(result.user); // Cambiar el estado a "logueado" con los datos del usuario
+          navigate('/'); // Redirige a la página de inicio
         }, 3000);
 
         // Guardar el estado de la sesión en el almacenamiento local si la casilla está marcada

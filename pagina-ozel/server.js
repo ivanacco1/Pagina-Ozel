@@ -43,6 +43,22 @@ const createUserData = (user) => {
   };
 };
 
+// Función para crear userData
+const createUserDataComplete = (user) => {
+  return {
+    AccountID: user.AccountID,
+    FirstName: user.FirstName,
+    LastName: user.LastName,
+    Email: user.Email,
+    Role: user.Role,
+    Phone: user.Phone,
+    Address: user.Address,
+    City: user.City,
+    PostalCode: user.PostalCode,
+    DateRegistered: user.DateRegistered
+  };
+};
+
 
 
 // Ruta para el registro de usuarios
@@ -57,10 +73,11 @@ app.post('/api/usuarios/registro', async (req, res) => {
   try {
     // Generar un hash de la contraseña
     const hashedPassword = await bcrypt.hash(contraseña, 10);
+    const fechaRegistro = new Date();
 
-    // Insertar el usuario en la base de datos con la contraseña hasheada
-    const query = 'INSERT INTO Usuarios (FirstName, LastName, Email, Password) VALUES (?, ?, ?, ?)';
-    db.query(query, [nombre, apellido, correo, hashedPassword], (err, results) => {
+    // Insertar el usuario en la base de datos con la contraseña hasheada y la fecha de registro
+    const query = 'INSERT INTO Usuarios (FirstName, LastName, Email, Password, DateRegistered) VALUES (?, ?, ?, ?, ?)';
+    db.query(query, [nombre, apellido, correo, hashedPassword, fechaRegistro], (err, results) => {
       if (err) {
         console.error('Error insertando usuario en la base de datos:', err);
         return res.status(500).json({ message: 'Error registrando el usuario' });
@@ -78,10 +95,8 @@ app.post('/api/usuarios/registro', async (req, res) => {
 
         const user = userResults[0];
 
-        
-
-       // Enviar los datos del usuario al frontend
-       const userData = createUserData(user)
+        // Enviar los datos del usuario al frontend
+        const userData = createUserData(user);
 
         res.status(200).json({ message: 'Usuario registrado exitosamente!', user: userData });
       });
@@ -91,7 +106,6 @@ app.post('/api/usuarios/registro', async (req, res) => {
     return res.status(500).json({ message: 'Error registrando el usuario' });
   }
 });
-
 
 
 
@@ -144,15 +158,26 @@ app.post('/api/usuarios/login', (req, res) => {
   });
 });
 
+
+
+
+
+
+
 //endpoint para modificar usuario
 app.put('/api/usuarios/:id', (req, res) => {
   const userId = req.params.id;
-  const { FirstName, LastName, Email, CurrentPassword, NewPassword, Phone, Address, City, PostalCode, Role } = req.body;
+  const { FirstName, LastName, Email, CurrentPassword, NewPassword, Phone, Address, City, PostalCode, Role , TargetID, AdminPassword} = req.body;
+
+  console.log(req.body);
 
   // Validar datos de entrada
-  if (!FirstName || !LastName || !Email) {
-    return res.status(400).json({ message: 'Todos los campos obligatorios deben ser proporcionados' });
+  if (!AdminPassword) {
+    if (!FirstName || !LastName || !Email) {
+      return res.status(400).json({ message: 'Todos los campos obligatorios deben ser proporcionados' });
+    }
   }
+
 
   // Definir Función para actualizar el usuario
   const updateUser = async (hashedPassword) => {
@@ -194,7 +219,40 @@ app.put('/api/usuarios/:id', (req, res) => {
     });
   };
 
-  console.log(userId);
+
+  // Definir Función para actualizar el usuario
+  const updateUser2 = async (hashedPassword) => {
+    // Crear la consulta SQL para actualizar el usuario
+    let query = `UPDATE Usuarios SET  
+                  ${hashedPassword ? 'Password = ? ' : ''}
+                  ${Role ? 'Role = ?' : ''} 
+                  WHERE AccountID = ?`;
+
+    const values = [];
+    if (hashedPassword) {
+      values.push(hashedPassword);
+    }
+
+    if (Role) {
+      values.push(Role);
+    }
+    values.push(TargetID);
+
+    // Ejecutar la consulta SQL
+    db.query(query, values, (err, results) => {
+      if (err) {
+        console.error('Error actualizando el usuario en la base de datos:', err);
+        return res.status(501).json({ message: 'Error actualizando el usuario' });
+      }
+
+        res.status(200).json( {message: 'Usuario actualizado exitosamente!'});
+
+    });
+  };
+
+
+
+  //console.log(userId);
   // Verificar si el correo electrónico ya está en uso por otro usuario
   const checkEmailQuery = 'SELECT * FROM Usuarios WHERE Email = ? AND AccountID != ?';
   db.query(checkEmailQuery, [Email, userId], (err, results) => {
@@ -239,12 +297,53 @@ app.put('/api/usuarios/:id', (req, res) => {
         }
       });
     } else {
-      // Si no hay CurrentPassword, se asume que es una solicitud de cambio de datos para Admin
-      updateUser();
+      // Si no hay CurrentPassword, se asume que es una solicitud de cambio de datos de Admin
+
+      db.query('SELECT Password, Email FROM Usuarios WHERE AccountID = ?', [userId], async (err, results) => {
+        if (err) {
+          console.error('Error obteniendo la contraseña actual del usuario:', err);
+          return res.status(500).json({ message: 'Error obteniendo la contraseña actual del usuario' });
+        }
+
+        const user = results[0];
+        const isPasswordCorrect = await bcrypt.compare(AdminPassword, user.Password);
+        if (!isPasswordCorrect) {
+          return res.status(403).json({ message: 'La contraseña actual es incorrecta' });
+        }
+          updateUser2();
+      });
     }
   });
 });
 
+
+
+// Ruta para obtener la lista de usuarios
+app.get('/api/usuarios/lista', (req, res) => {
+  const query = 'SELECT AccountID, FirstName, LastName, Email, Role, Phone, Address, City, PostalCode, DateRegistered FROM Usuarios';
+
+  db.query(query, (err, results) => {
+    if (err) {
+      console.error('Error obteniendo la lista de usuarios de la base de datos:', err);
+      return res.status(500).json({ message: 'Error obteniendo la lista de usuarios' });
+    }
+
+
+    // Formatear la fecha en cada pedido
+    const formattedResults = results.map(result => {
+      return {
+        ...result,
+        DateRegistered: result.DateRegistered.toLocaleDateString().split('T')[0] // Formato día-mes-año
+      };
+    });
+
+
+    // Mapeamos los resultados para crear la lista de usuarios
+    const usuarios = formattedResults.map(user => createUserDataComplete(user));
+
+    res.status(200).json(usuarios);
+  });
+});
 
 
 
