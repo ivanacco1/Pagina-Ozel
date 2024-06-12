@@ -172,8 +172,17 @@ SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
 
 
+-- Corrige el tipo de Variable para Stock de tabla Producto
+--------------------------------------------
+
+
+ALTER TABLE Productos
+MODIFY COLUMN Stock INT;
+
+
 -- Intento de crear usuario admin con schema
 --------------------------------------------
+
 
 INSERT INTO `Ozel`.`Usuarios` (`FirstName`, `LastName`, `Email`, `Password`, `Role`)
 SELECT 'admin', 'admin', 'admin@admin', '$2b$10$Q4wFA8jqiclpAmu.4Zh9iuby05eaQj1v.bEMvkr9HokTgbpZYj4Mq', 'admin'

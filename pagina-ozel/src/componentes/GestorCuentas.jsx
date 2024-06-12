@@ -29,7 +29,7 @@ const GestorCuentas = () => {
       const response = await axios.get('http://localhost:5000/api/usuarios/lista');
       if (response.status === 200) {
         setUsuarios(response.data);
-        console.log(response.data);
+        //console.log(response.data);
       } else {
         console.error('Error al cargar la lista de usuarios:', response.statusText);
       }
@@ -171,10 +171,7 @@ const GestorCuentas = () => {
     isValueIncluded(user.LastName, searchTerm) ||
     isValueIncluded(user.Email, searchTerm) ||
     isValueIncluded(user.Role, searchTerm) ||
-    isValueIncluded(user.Phone, searchTerm) ||
-    isValueIncluded(user.Address, searchTerm) ||
-    isValueIncluded(user.City, searchTerm) ||
-    isValueIncluded(user.PostalCode, searchTerm)
+    isValueIncluded(user.Phone, searchTerm)
   );
 
   return (
@@ -202,12 +199,9 @@ const GestorCuentas = () => {
                   <TableCell>Email</TableCell>
                   <TableCell>Rol</TableCell>
                   <TableCell>Teléfono</TableCell>
-                  <TableCell>Dirección</TableCell>
-                  <TableCell>Ciudad</TableCell>
-                  <TableCell>Código Postal</TableCell>
-                  <TableCell>Fecha de registro</TableCell>
-                  <TableCell>Restablecer Contraseña</TableCell>
-                  <TableCell>Borrar Cuenta</TableCell>
+                  <TableCell>Fecha de<br/>registro</TableCell>
+                  <TableCell>Restablecer<br/>Contraseña</TableCell>
+                  <TableCell>Borrar<br/>Cuenta</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -238,13 +232,11 @@ const GestorCuentas = () => {
                       </FormControl>
                     </TableCell>
                     <TableCell>{user.Phone}</TableCell>
-                    <TableCell>{user.Address}</TableCell>
-                    <TableCell>{user.City}</TableCell>
-                    <TableCell>{user.PostalCode}</TableCell>
                     <TableCell>{user.DateRegistered}</TableCell>
                     <TableCell>
                       <IconButton 
                         color="secondary" 
+                        disabled={user.AccountID === usuario.UserId} 
                         onClick={() => handleResetPasswordClick(user)}
                       >
                         <EditIcon />
@@ -252,7 +244,8 @@ const GestorCuentas = () => {
                     </TableCell>
                     <TableCell>
                       <IconButton 
-                        color="error" 
+                        color="error"        
+                        disabled={user.AccountID === usuario.UserId} 
                         onClick={() => handleDeleteUserClick(user)}
                       >
                         <DeleteIcon />

@@ -1,19 +1,15 @@
-// MiCuenta.jsx
-
 import React, { useState, useEffect } from 'react';
 import { useAuth } from './AutentificacionProvider';
-import { Typography, Container, Box, AppBar, Tabs, Tab, Grid, Card, CardContent, CircularProgress, TextField, Button, IconButton, InputAdornment } from '@mui/material';
+import { Typography, Container, Box, AppBar, Tabs, Tab } from '@mui/material';
 import '../estilos/MiCuenta.css';
 import Resumen from './Resumen';
 import HistorialCompras from './HistorialCompras';
 import GestorCuentas from './GestorCuentas';
+import GestorProductos from './GestorProductos';
 
 const MiCuenta = () => {
-  const { usuario, actualizarUsuario } = useAuth();
+  const { usuario } = useAuth();
   const [selectedTab, setSelectedTab] = useState(0);
-
-
-
 
   useEffect(() => {
     if (usuario && usuario.Pedidos) {
@@ -23,18 +19,7 @@ const MiCuenta = () => {
 
   const handleTabChange = (event, newValue) => {
     setSelectedTab(newValue);
-   /* if (newValue === 1) {
-    }
-    if (newValue === 3) {  // Tab index for "Gestor de Cuentas"
-      setLoading(true);
-      // Logic to load data if needed
-      setLoading(false);
-    }*/
   };
-
-
-
-
 
   if (!usuario) {
     return <Typography variant="h5">Debes estar logueado para ver esta página.</Typography>;
@@ -60,18 +45,10 @@ const MiCuenta = () => {
           </Tabs>
         </AppBar>
         <Box p={3} className="mi-cuenta-content">
-          {selectedTab === 0 && (
-            <>
-              <Resumen />
-            </>
-          )}
-
-          {selectedTab === 1 && (
-            <>
-             <HistorialCompras />
-            </>
-          )}
-          {selectedTab === 3 && ( <GestorCuentas />)}
+          {selectedTab === 0 && <Resumen />}
+          {selectedTab === 1 && <HistorialCompras />}
+          {selectedTab === 2 && <GestorProductos />}
+          {selectedTab === 3 && <GestorCuentas />}
         </Box>
       </Box>
     </Container>

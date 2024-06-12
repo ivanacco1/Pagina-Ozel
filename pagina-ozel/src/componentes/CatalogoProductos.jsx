@@ -7,7 +7,7 @@ const CatalogoProductos = () => {
   useEffect(() => {
     const obtenerProductos = async () => {
       try {
-        const response = await axios.get('/api/productos');
+        const response = await axios.get('http://localhost:3000/api/productos');
         setProductos(response.data);
       } catch (error) {
         console.error('Error al obtener los productos:', error);
