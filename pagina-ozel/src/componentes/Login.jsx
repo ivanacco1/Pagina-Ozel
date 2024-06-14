@@ -36,10 +36,10 @@ function Login({ isOpen, onClose }) {
         const result = response.data;
         setLoginExitoso(true);
         setError(null);
+        login(result.user); // Cambiar el estado a "logueado" con los datos del usuario
         setTimeout(() => {
           setLoginExitoso(false);
           onClose();
-          login(result.user); // Cambiar el estado a "logueado" con los datos del usuario
           navigate('/'); // Redirige a la página de inicio
         }, 3000);
 

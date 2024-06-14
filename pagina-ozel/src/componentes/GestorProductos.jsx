@@ -20,11 +20,15 @@ const GestorProductos = () => {
     Subcategory: '',
     Price: '',
     Stock: '',
-    DateAdded: '',
     Size: '',
     Color: '',
-    Discount: ''
+    Discount: '',
+    Description: '',
+    Image: null,
+    SaleStart: '',
+    SaleEnd: ''
   });
+  const [selectedFileName, setSelectedFileName] = useState('');
 
   useEffect(() => {
     cargarProductos();
@@ -63,17 +67,22 @@ const GestorProductos = () => {
       Subcategory: '',
       Price: '',
       Stock: '',
-      DateAdded: '',
       Size: '',
       Color: '',
-      Discount: ''
+      Discount: '',
+      Description: '',
+      Image: null,
+      SaleStart: '',
+      SaleEnd: ''
     });
+    setSelectedFileName('');
     setOpenFormDialog(true);
   };
 
   const handleEditProductClick = (product) => {
     setFormMode('edit');
     setFormValues(product);
+    setSelectedFileName('');
     setOpenFormDialog(true);
   };
 
@@ -85,10 +94,32 @@ const GestorProductos = () => {
     }));
   };
 
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    setFormValues((prevValues) => ({
+      ...prevValues,
+      Image: file
+    }));
+    setSelectedFileName(file ? file.name : '');
+  };
+
   const handleFormSubmit = async () => {
     try {
+      const formData = new FormData();
+      for (const key in formValues) {
+        if (formValues[key] !== null) {
+          formData.append(key, formValues[key]);
+        }
+      }
+
       if (formMode === 'add') {
-        const response = await axios.post('http://localhost:3000/api/productos', formValues);
+        formData.append('DateAdded', new Date().toISOString());
+        console.log(formData);
+        const response = await axios.post('http://localhost:3000/api/productos', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        });
         if (response.status === 201) {
           alert('Producto añadido correctamente.');
         } else {
@@ -96,7 +127,11 @@ const GestorProductos = () => {
           alert('Error al añadir el producto.');
         }
       } else {
-        const response = await axios.put(`http://localhost:3000/api/productos/${formValues.ProductID}`, formValues);
+        const response = await axios.put(`http://localhost:3000/api/productos/${formValues.ProductID}`, formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        });
         if (response.status === 200) {
           alert('Producto actualizado correctamente.');
         } else {
@@ -231,17 +266,6 @@ const GestorProductos = () => {
                   onChange={handleFormChange}
                 />
                 <TextField
-                  required
-                  label="Fecha de Adición"
-                  name="DateAdded"
-                  type="date"
-                  value={formValues.DateAdded}
-                  onChange={handleFormChange}
-                  InputLabelProps={{
-                    shrink: true,
-                  }}
-                />
-                <TextField
                   label="Tamaño"
                   name="Size"
                   value={formValues.Size}
@@ -259,6 +283,52 @@ const GestorProductos = () => {
                   type="number"
                   value={formValues.Discount}
                   onChange={handleFormChange}
+                />
+                <TextField
+                  label="Descripción"
+                  name="Description"
+                  value={formValues.Description}
+                  onChange={handleFormChange}
+                  multiline
+                  rows={4}
+                />
+                <Box display="flex" alignItems="center" mt={2}>
+                  <Button
+                    variant="contained"
+                    component="label"
+                  >
+                    Subir Imagen
+                    <input
+                      type="file"
+                      hidden
+                      onChange={handleFileChange}
+                    />
+                  </Button>
+                  {selectedFileName && (
+                    <Typography variant="body2" ml={2}>
+                      {selectedFileName}
+                    </Typography>
+                  )}
+                </Box>
+                <TextField
+                  label="Inicio de Venta"
+                  name="SaleStart"
+                  type="date"
+                  value={formValues.SaleStart}
+                  onChange={handleFormChange}
+                  InputLabelProps={{
+                    shrink: true,
+                  }}
+                />
+                <TextField
+                  label="Fin de Venta"
+                  name="SaleEnd"
+                  type="date"
+                  value={formValues.SaleEnd}
+                  onChange={handleFormChange}
+                  InputLabelProps={{
+                    shrink: true,
+                  }}
                 />
               </Box>
             </DialogContent>

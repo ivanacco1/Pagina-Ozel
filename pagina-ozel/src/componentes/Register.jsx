@@ -55,10 +55,10 @@ function Register({ isOpen, onClose }) {
         const result = response.data;
         setRegistroExitoso(true);
         setError(null); // Limpiar el mensaje de error si lo hay
+        login(result.user);  // Cambiar el estado a "logueado"
         setTimeout(() => {
           setRegistroExitoso(false);
           onClose();
-          login(result.user);  // Cambiar el estado a "logueado"
           navigate('/'); // Redirige a la página de inicio
         }, 3000);
       } else {
