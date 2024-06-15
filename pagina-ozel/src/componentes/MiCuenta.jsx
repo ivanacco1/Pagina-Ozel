@@ -40,7 +40,7 @@ const MiCuenta = () => {
           >
             <Tab label="Resumen" />
             <Tab label="Historial de Compras" />
-            {usuario.Role === 'admin' && <Tab label="Gestor de Productos" />}
+            {(usuario.Role === 'admin' || usuario.Role === 'gestor') && <Tab label="Gestor de Productos" />}
             {usuario.Role === 'admin' && <Tab label="Gestor de Cuentas" />}
           </Tabs>
         </AppBar>

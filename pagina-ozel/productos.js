@@ -79,7 +79,7 @@ app.get('/api/productos', (req, res) => {
 
 // Endpoint para eliminar productos
 app.delete('/api/productos/:id', async (req, res) => {
-  console.log(req.params, req.body);
+  //console.log(req.params, req.body);
   const { id } = req.params;
   const { AdminPassword, AccountID } = req.body;
 

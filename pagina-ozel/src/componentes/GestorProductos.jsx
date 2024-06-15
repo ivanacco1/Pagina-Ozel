@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { CircularProgress, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography, TextField, Button, IconButton, Box, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
+import { CircularProgress, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography, TextField, Button, IconButton, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
 import axios from 'axios';
 import { useAuth } from './AutentificacionProvider';
+import ProductForm from './ProductForm';
 import '../estilos/MiCuenta.css';
 
 const GestorProductos = () => {
@@ -12,7 +14,7 @@ const GestorProductos = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [openFormDialog, setOpenFormDialog] = useState(false);
-  const [formMode, setFormMode] = useState('add'); // 'add' o 'edit'
+  const [formMode, setFormMode] = useState('add');
   const [formValues, setFormValues] = useState({
     ProductID: '',
     ProductName: '',
@@ -28,7 +30,8 @@ const GestorProductos = () => {
     SaleStart: '',
     SaleEnd: ''
   });
-  const [selectedFileName, setSelectedFileName] = useState('');
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const [adminPassword, setAdminPassword] = useState('');
 
   useEffect(() => {
     cargarProductos();
@@ -75,77 +78,50 @@ const GestorProductos = () => {
       SaleStart: '',
       SaleEnd: ''
     });
-    setSelectedFileName('');
     setOpenFormDialog(true);
   };
 
   const handleEditProductClick = (product) => {
     setFormMode('edit');
     setFormValues(product);
-    setSelectedFileName('');
     setOpenFormDialog(true);
   };
 
-  const handleFormChange = (e) => {
-    const { name, value } = e.target;
-    setFormValues((prevValues) => ({
-      ...prevValues,
-      [name]: value
-    }));
+  const handleDeleteProductClick = (product) => {
+    setSelectedProduct(product);
+    setOpenDeleteDialog(true);
   };
 
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    setFormValues((prevValues) => ({
-      ...prevValues,
-      Image: file
-    }));
-    setSelectedFileName(file ? file.name : '');
-  };
-
-  const handleFormSubmit = async () => {
+  const confirmDeleteProduct = async () => {
     try {
-      const formData = new FormData();
-      for (const key in formValues) {
-        if (formValues[key] !== null) {
-          formData.append(key, formValues[key]);
+      const response = await axios.delete(`http://localhost:3000/api/productos/${selectedProduct.ProductID}`, {
+        data: {
+          AdminPassword: adminPassword,
+          AccountID: usuario.UserId
         }
-      }
-
-      if (formMode === 'add') {
-        formData.append('DateAdded', new Date().toISOString());
-        console.log(formData);
-        const response = await axios.post('http://localhost:3000/api/productos', formData, {
-          headers: {
-            'Content-Type': 'multipart/form-data'
-          }
-        });
-        if (response.status === 201) {
-          alert('Producto añadido correctamente.');
-        } else {
-          console.error('Error al añadir el producto:', response.statusText);
-          alert('Error al añadir el producto.');
-        }
+      });
+      if (response.status === 204) {
+        alert('Producto eliminado correctamente.');
+        cargarProductos();
       } else {
-        const response = await axios.put(`http://localhost:3000/api/productos/${formValues.ProductID}`, formData, {
-          headers: {
-            'Content-Type': 'multipart/form-data'
-          }
-        });
-        if (response.status === 200) {
-          alert('Producto actualizado correctamente.');
-        } else {
-          console.error('Error al actualizar el producto:', response.statusText);
-          alert('Error al actualizar el producto.');
-        }
+        console.error('Error al eliminar el producto:', response.statusText);
+        alert('Error al eliminar el producto.');
       }
-      cargarProductos();
     } catch (error) {
-      console.error('Error al enviar el formulario:', error.message);
-      alert('Error al enviar el formulario.');
+      console.error('Error al eliminar el producto:', error.message);
+      if (error.response) {
+        alert(`Error al eliminar el producto: ${error.response.data.message}`);
+      } else {
+        alert('Error al eliminar el producto.');
+      }
     } finally {
-      setOpenFormDialog(false);
+      setOpenDeleteDialog(false);
+      setAdminPassword('');
     }
+  };
+
+  const handleFormSubmit = () => {
+    cargarProductos();
   };
 
   const filteredProductos = productos.filter((product) =>
@@ -176,17 +152,18 @@ const GestorProductos = () => {
             <Table>
               <TableHead>
                 <TableRow>
-                  <TableCell>ProductID</TableCell>
-                  <TableCell>ProductName</TableCell>
-                  <TableCell>Category</TableCell>
-                  <TableCell>Subcategory</TableCell>
-                  <TableCell>Price</TableCell>
+                  <TableCell>ID</TableCell>
+                  <TableCell>Nombre</TableCell>
+                  <TableCell>Categoria</TableCell>
+                  <TableCell>Subcategoria</TableCell>
+                  <TableCell>Precio</TableCell>
                   <TableCell>Stock</TableCell>
-                  <TableCell>DateAdded</TableCell>
-                  <TableCell>Size</TableCell>
+                  <TableCell>Fecha</TableCell>
+                  <TableCell>Tamaño</TableCell>
                   <TableCell>Color</TableCell>
-                  <TableCell>Discount</TableCell>
+                  <TableCell>Descuento</TableCell>
                   <TableCell>Editar</TableCell>
+                  <TableCell>Eliminar</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -210,133 +187,47 @@ const GestorProductos = () => {
                         <EditIcon />
                       </IconButton>
                     </TableCell>
+                    <TableCell>
+                      <IconButton
+                        color="error"
+                        onClick={() => handleDeleteProductClick(product)}
+                      >
+                        <DeleteIcon />
+                      </IconButton>
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
             </Table>
           </TableContainer>
 
-          {/* Formulario de producto */}
-          <Dialog open={openFormDialog} onClose={() => setOpenFormDialog(false)}>
-            <DialogTitle>{formMode === 'add' ? 'Añadir Nuevo Producto' : 'Editar Producto'}</DialogTitle>
+          <ProductForm
+            open={openFormDialog}
+            onClose={() => setOpenFormDialog(false)}
+            onFormSubmit={handleFormSubmit}
+            formMode={formMode}
+            formValues={formValues}
+            setFormValues={setFormValues}
+          />
+
+          <Dialog open={openDeleteDialog} onClose={() => setOpenDeleteDialog(false)}>
+            <DialogTitle>Confirmar Eliminación</DialogTitle>
             <DialogContent>
-              <Box
-                component="form"
-                sx={{
-                  '& .MuiTextField-root': { m: 1, width: '100%' },
-                }}
-                noValidate
-                autoComplete="off"
-              >
-                <TextField
-                  required
-                  label="Nombre del Producto"
-                  name="ProductName"
-                  value={formValues.ProductName}
-                  onChange={handleFormChange}
-                />
-                <TextField
-                  required
-                  label="Categoría"
-                  name="Category"
-                  value={formValues.Category}
-                  onChange={handleFormChange}
-                />
-                <TextField
-                  required
-                  label="Subcategoría"
-                  name="Subcategory"
-                  value={formValues.Subcategory}
-                  onChange={handleFormChange}
-                />
-                <TextField
-                  required
-                  label="Precio"
-                  name="Price"
-                  type="number"
-                  value={formValues.Price}
-                  onChange={handleFormChange}
-                />
-                <TextField
-                  required
-                  label="Stock"
-                  name="Stock"
-                  type="number"
-                  value={formValues.Stock}
-                  onChange={handleFormChange}
-                />
-                <TextField
-                  label="Tamaño"
-                  name="Size"
-                  value={formValues.Size}
-                  onChange={handleFormChange}
-                />
-                <TextField
-                  label="Color"
-                  name="Color"
-                  value={formValues.Color}
-                  onChange={handleFormChange}
-                />
-                <TextField
-                  label="Descuento"
-                  name="Discount"
-                  type="number"
-                  value={formValues.Discount}
-                  onChange={handleFormChange}
-                />
-                <TextField
-                  label="Descripción"
-                  name="Description"
-                  value={formValues.Description}
-                  onChange={handleFormChange}
-                  multiline
-                  rows={4}
-                />
-                <Box display="flex" alignItems="center" mt={2}>
-                  <Button
-                    variant="contained"
-                    component="label"
-                  >
-                    Subir Imagen
-                    <input
-                      type="file"
-                      hidden
-                      onChange={handleFileChange}
-                    />
-                  </Button>
-                  {selectedFileName && (
-                    <Typography variant="body2" ml={2}>
-                      {selectedFileName}
-                    </Typography>
-                  )}
-                </Box>
-                <TextField
-                  label="Inicio de Venta"
-                  name="SaleStart"
-                  type="date"
-                  value={formValues.SaleStart}
-                  onChange={handleFormChange}
-                  InputLabelProps={{
-                    shrink: true,
-                  }}
-                />
-                <TextField
-                  label="Fin de Venta"
-                  name="SaleEnd"
-                  type="date"
-                  value={formValues.SaleEnd}
-                  onChange={handleFormChange}
-                  InputLabelProps={{
-                    shrink: true,
-                  }}
-                />
-              </Box>
+              <Typography variant="body1">
+                ¿Está seguro de que desea eliminar el producto "{selectedProduct?.ProductName}"?
+              </Typography>
+              <TextField
+                label="Contraseña del Administrador"
+                type="password"
+                fullWidth
+                value={adminPassword}
+                onChange={(e) => setAdminPassword(e.target.value)}
+                margin="normal"
+              />
             </DialogContent>
             <DialogActions>
-              <Button onClick={() => setOpenFormDialog(false)} color="primary">Cancelar</Button>
-              <Button onClick={handleFormSubmit} color="primary" variant="contained">
-                {formMode === 'add' ? 'Añadir' : 'Guardar'}
-              </Button>
+              <Button onClick={() => setOpenDeleteDialog(false)} color="primary">Cancelar</Button>
+              <Button onClick={confirmDeleteProduct} color="primary" variant="contained">Confirmar</Button>
             </DialogActions>
           </Dialog>
         </>
