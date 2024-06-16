@@ -10,6 +10,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import '../estilos/Header.css';
 import Home from './Home';
 import MiCuenta from './MiCuenta';
+import CatalogoProductos from './CatalogoProductos'; // Importamos el nuevo componente
 
 const Navegacion = () => {
   const { usuario, estado, logout } = useAuth();
@@ -52,7 +53,7 @@ const Navegacion = () => {
           </div>
           <div className="nav-right">
             <Button className="nav-button" component={Link} to="/">INICIO</Button>
-            <Button className="nav-button">PRODUCTOS</Button>
+            <Button className="nav-button" component={Link} to="/catalogo">PRODUCTOS</Button>
             <Button className="nav-button">AYUDA</Button>
             <Button className="nav-button">CONTACTO</Button>
             <Button className="nav-button">
@@ -65,6 +66,7 @@ const Navegacion = () => {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/mi-cuenta" element={<MiCuenta />} />
+          <Route path="/catalogo" element={<CatalogoProductos />} /> {/* Añadir la nueva ruta */}
         </Routes>
       </div>
       <Register
