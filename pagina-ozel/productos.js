@@ -16,7 +16,7 @@ app.use(bodyParser.json());
 // Configuración de multer para manejar la carga de archivos
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, 'public/uploads/');
+    cb(null, path.join(__dirname, 'public/uploads/'));
   },
   filename: (req, file, cb) => {
     cb(null, `${Date.now()}-${file.originalname}`);
@@ -63,13 +63,14 @@ app.get('/api/productos', (req, res) => {
       return res.status(500).json({ message: 'Error al obtener productos' });
     }
 
-    // Formatear las fechas en el resultado
+    // Formatea las fechas y construir la URL completa de la imagen en el resultado
     const formattedResults = results.map(product => {
       return {
         ...product,
         DateAdded: product.DateAdded ? formatDate(product.DateAdded) : null,
         SaleStart: product.SaleStart ? formatDate(product.SaleStart) : null,
-        SaleEnd: product.SaleEnd ? formatDate(product.SaleEnd) : null
+        SaleEnd: product.SaleEnd ? formatDate(product.SaleEnd) : null,
+        ImageURL: product.ImageURL ? `http://localhost:${PORT}${product.ImageURL}` : null
       };
     });
 
@@ -79,7 +80,6 @@ app.get('/api/productos', (req, res) => {
 
 // Endpoint para eliminar productos
 app.delete('/api/productos/:id', async (req, res) => {
-  //console.log(req.params, req.body);
   const { id } = req.params;
   const { AdminPassword, AccountID } = req.body;
 
@@ -87,7 +87,7 @@ app.delete('/api/productos/:id', async (req, res) => {
     return res.status(400).json({ message: 'La contraseña del administrador y el ID de la cuenta son obligatorios' });
   }
 
-  // Verificar la contraseña del administrador
+  // Verifica la contraseña del administrador
   const query = 'SELECT Password FROM Usuarios WHERE AccountID = ? AND Role = "admin"';
   db.query(query, [AccountID], async (err, results) => {
     if (err) {
@@ -138,7 +138,7 @@ app.post('/api/productos', upload.single('Image'), (req, res) => {
 
   let { SaleStart, SaleEnd } = req.body;
 
-  // Validar que el precio sea mayor o igual a 1
+  // Valida si el precio es mayor o igual a 1
   if (Price < 1) {
     return res.status(400).json({ message: 'El precio debe ser mayor o igual a 1' });
   }
@@ -147,7 +147,7 @@ app.post('/api/productos', upload.single('Image'), (req, res) => {
   const DateAdded = formatDate(new Date());
   const currentDate = formatDate(new Date());
 
-  // Asignar fecha actual si SaleStart o SaleEnd son nulos
+  // Asigna fecha actual si SaleStart o SaleEnd son nulos
   SaleStart = SaleStart ? formatDate(SaleStart) : currentDate;
   SaleEnd = SaleEnd ? formatDate(SaleEnd) : currentDate;
 
@@ -179,7 +179,23 @@ app.post('/api/productos', upload.single('Image'), (req, res) => {
       return res.status(500).json({ message: 'Error al añadir el producto' });
     }
 
-    res.status(201).json({ message: 'Producto añadido correctamente' });
+    res.status(201).json({
+      message: 'Producto añadido correctamente',
+      product: {
+        ProductName,
+        Category,
+        Subcategory,
+        Description,
+        Price,
+        Stock,
+        Size,
+        Color,
+        Discount,
+        SaleStart,
+        SaleEnd,
+        ImageURL: ImageURL ? `http://localhost:${PORT}${ImageURL}` : null
+      }
+    });
   });
 });
 
@@ -200,7 +216,7 @@ app.put('/api/productos/:id', upload.single('Image'), (req, res) => {
 
   let { SaleStart, SaleEnd } = req.body;
 
-  // Validar que el precio sea mayor o igual a 1
+  // Validar si el precio es mayor o igual a 1
   if (Price < 1) {
     return res.status(400).json({ message: 'El precio debe ser mayor o igual a 1' });
   }
@@ -208,7 +224,7 @@ app.put('/api/productos/:id', upload.single('Image'), (req, res) => {
   const ImageURL = req.file ? `/uploads/${req.file.filename}` : null;
   const currentDate = formatDate(new Date());
 
-  // Asignar fecha actual si SaleStart o SaleEnd son nulos
+  // Asigna fecha actual si SaleStart o SaleEnd son nulos
   SaleStart = SaleStart ? formatDate(SaleStart) : currentDate;
   SaleEnd = SaleEnd ? formatDate(SaleEnd) : currentDate;
 
@@ -234,7 +250,7 @@ app.put('/api/productos/:id', upload.single('Image'), (req, res) => {
 
   if (ImageURL) {
     query += `, ImageURL = ?`;
-    values.splice(11, 0, ImageURL);
+    values.splice(10, 0, ImageURL);
   }
 
   query += ` WHERE ProductID = ?`;
@@ -245,13 +261,29 @@ app.put('/api/productos/:id', upload.single('Image'), (req, res) => {
       return res.status(500).json({ message: 'Error al actualizar el producto' });
     }
 
-    res.status(200).json({ message: 'Producto actualizado correctamente' });
+    res.status(200).json({
+      message: 'Producto actualizado correctamente',
+      product: {
+        ProductName,
+        Category,
+        Subcategory,
+        Description,
+        Price,
+        Stock,
+        Size,
+        Color,
+        Discount,
+        SaleStart,
+        SaleEnd,
+        ImageURL: ImageURL ? `http://localhost:${PORT}${ImageURL}` : null
+      }
+    });
   });
 });
 
-// Servir archivos estáticos desde el directorio "uploads"
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+// Ruta estática para servir los archivos de imagen
+app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
 
 app.listen(PORT, () => {
-  console.log(`API de Productos escuchando en puerto ${PORT}`);
+  console.log(`Servidor corriendo en el puerto ${PORT}`);
 });

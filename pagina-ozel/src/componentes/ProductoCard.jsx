@@ -1,5 +1,3 @@
-// ProductoCard.jsx
-
 import React from 'react';
 import { Card, CardContent, CardMedia, Typography, CardActionArea, IconButton, Box } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
@@ -7,16 +5,19 @@ import { useAuth } from './AutentificacionProvider';
 
 const ProductoCard = ({ producto, onEdit }) => {
   const { usuario } = useAuth();
-    //console.log(usuario.Role);
+  //console.log(producto);
+
   const isAuthorized = usuario?.Role === 'admin' || usuario?.Role === 'gestor';
+
+  const imageUrl = producto.ImageURL ? encodeURI(producto.ImageURL) : '';
 
   return (
     <Card>
       <CardActionArea>
         <CardMedia
           component="img"
-          height="140"
-          image={producto.ImageUrl} // Asegúrate de que el producto tenga una URL de imagen
+          height="340"
+          image={imageUrl} // TODO: cambiar URL para que sea variable entre localhost y dominio
           alt={producto.ProductName}
         />
         <CardContent>

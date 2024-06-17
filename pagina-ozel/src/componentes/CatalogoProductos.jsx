@@ -1,9 +1,7 @@
-// CatalogoProductos.jsx
-
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Grid, Typography, FormControl, FormGroup, FormControlLabel, Checkbox, Box } from '@mui/material';
-import ProductoCard from './ProductoCard'; // Asegúrate de tener un componente ProductoCard para mostrar cada producto
+import ProductoCard from './ProductoCard'; 
 import ProductForm from './ProductForm';
 import { useAuth } from './AutentificacionProvider';
 import '../estilos/Catalogo.css';
@@ -78,11 +76,33 @@ const CatalogoProductos = () => {
   const filtrarProductos = () => {
     return productos.filter((producto) => {
       const { Category, Size, Color } = producto;
-      const categoriaFiltro = Object.keys(filtros.categoria).some(key => filtros.categoria[key] && Category.toLowerCase() === key);
-      const tallaFiltro = Object.keys(filtros.talla).some(key => filtros.talla[key] && Size.toLowerCase() === key);
-      const colorFiltro = Object.keys(filtros.color).some(key => filtros.color[key] && Color.toLowerCase() === key);
-
-      return (!categoriaFiltro && !tallaFiltro && !colorFiltro) || categoriaFiltro || tallaFiltro || colorFiltro;
+      
+      // Verificar filtros de categoría
+      const categoriaFiltro = Object.keys(filtros.categoria).every(key => {
+        if (filtros.categoria[key]) {
+          return Category.toLowerCase().includes(key.toLowerCase());
+        }
+        return true; // Mostrar todos si ningún filtro está seleccionado
+      });
+  
+      // Verificar filtros de talla
+      const tallaFiltro = Object.keys(filtros.talla).every(key => {
+        if (filtros.talla[key]) {
+          return Size.toLowerCase().includes(key.toLowerCase());
+        }
+        return true; // Mostrar todos si ningún filtro está seleccionado
+      });
+  
+      // Verificar filtros de color
+      const colorFiltro = Object.keys(filtros.color).every(key => {
+        if (filtros.color[key]) {
+          return Color.toLowerCase().includes(key.toLowerCase());
+        }
+        return true; // Mostrar todos si ningún filtro está seleccionado
+      });
+  
+      // Mostrar el producto si cumple con al menos un filtro
+      return categoriaFiltro && tallaFiltro && colorFiltro;
     });
   };
 
