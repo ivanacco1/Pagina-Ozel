@@ -57,7 +57,7 @@ const CatalogoProductos = () => {
         console.error('Error al cargar la lista de productos:', response.statusText);
       }
     } catch (error) {
-      console.error('Error al cargar la lista de productos:', error.message);
+      console.error('Error al cargar la lista de productos:', error.response.data.message);
     }
   };
 

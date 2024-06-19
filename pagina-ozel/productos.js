@@ -110,7 +110,7 @@ app.delete('/api/productos/:id', async (req, res) => {
     db.query(deleteQuery, [id], (err, deleteResults) => {
       if (err) {
         console.error('Error eliminando el producto de la base de datos:', err);
-        return res.status(500).json({ message: 'Error eliminando el producto' });
+        return res.status(500).json({ message: 'Producto actualmente en un carrito o pedido' });
       }
 
       if (deleteResults.affectedRows === 0) {
@@ -280,6 +280,12 @@ app.put('/api/productos/:id', upload.single('Image'), (req, res) => {
     });
   });
 });
+
+
+
+
+
+
 
 // Ruta estática para servir los archivos de imagen
 app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));

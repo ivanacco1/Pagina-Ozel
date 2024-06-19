@@ -4,7 +4,7 @@ import { TextField, Button, IconButton, InputAdornment, Checkbox, FormControlLab
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import { useAuth } from './AutentificacionProvider';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom'; 
+import { useNavigate } from 'react-router-dom';
 
 function Login({ isOpen, onClose }) {
   const { login } = useAuth();
@@ -14,7 +14,7 @@ function Login({ isOpen, onClose }) {
   const [mantenerSesion, setMantenerSesion] = useState(false);
   const [error, setError] = useState(null);
   const [loginExitoso, setLoginExitoso] = useState(false);
-  const navigate = useNavigate(); // Inicializa useNavigate
+  const navigate = useNavigate();
 
   const handleMostrarPasswordClick = () => {
     setMostrarPassword(!mostrarPassword);
@@ -36,17 +36,11 @@ function Login({ isOpen, onClose }) {
         const result = response.data;
         setLoginExitoso(true);
         setError(null);
-        login(result.user); // Cambiar el estado a "logueado" con los datos del usuario
+        login(result.user, mantenerSesion);
         setTimeout(() => {
           setLoginExitoso(false);
           onClose();
-          navigate('/'); // Redirige a la página de inicio
         }, 3000);
-
-        // Guardar el estado de la sesión en el almacenamiento local si la casilla está marcada
-        if (mantenerSesion) {
-          localStorage.setItem('usuario', JSON.stringify(result.user));
-        }
       } else {
         const errorData = response.data;
         if (response.status === 400 || response.status === 401) {
@@ -56,11 +50,18 @@ function Login({ isOpen, onClose }) {
         }
       }
     } catch (err) {
-      setError('Error de red');
+      if (err.response) {
+        // Error de respuesta del servidor
+        
+          setError(err.response.data.message || 'Credenciales incorrectas');
+
+      } else {
+        // La solicitud fue hecha pero no hubo respuesta
+        setError('No se pudo conectar con el servidor. Intente nuevamente más tarde.');
+      } 
     }
   };
 
-  // Restablecer los campos del formulario cuando el modal se cierra
   useEffect(() => {
     if (!isOpen) {
       setEmail('');

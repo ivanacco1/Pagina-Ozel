@@ -108,7 +108,7 @@ const GestorProductos = () => {
         alert('Error al eliminar el producto.');
       }
     } catch (error) {
-      console.error('Error al eliminar el producto:', error.message);
+      console.error('Error al eliminar el producto:', error.response.data.message);
       if (error.response) {
         alert(`Error al eliminar el producto: ${error.response.data.message}`);
       } else {

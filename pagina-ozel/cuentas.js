@@ -80,7 +80,7 @@ app.post('/api/usuarios/registro', async (req, res) => {
     db.query(query, [nombre, apellido, correo, hashedPassword, fechaRegistro], (err, results) => {
       if (err) {
         console.error('Error insertando usuario en la base de datos:', err);
-        return res.status(500).json({ message: 'Error registrando el usuario' });
+        return res.status(500).json({ message: 'Error registrando el usuario: Email en uso' });
       }
 
       // Obtener el ID del usuario recién creado
@@ -169,7 +169,7 @@ app.put('/api/usuarios/:id', (req, res) => {
   const userId = req.params.id;
   const { FirstName, LastName, Email, CurrentPassword, NewPassword, Phone, Address, City, PostalCode, Role , TargetID, AdminPassword} = req.body;
 
-  console.log(req.body);
+  //console.log(req.body);
 
   // Validar datos de entrada
   if (!AdminPassword) {
@@ -220,7 +220,7 @@ app.put('/api/usuarios/:id', (req, res) => {
   };
 
 
-  // Definir Función para actualizar el usuario
+  // Función para actualizar el usuario
   const updateUser2 = async (hashedPassword) => {
     // Crear la consulta SQL para actualizar el usuario
     let query = `UPDATE Usuarios SET  
@@ -277,7 +277,7 @@ app.put('/api/usuarios/:id', (req, res) => {
         const user = results[0];
         const isPasswordCorrect = await bcrypt.compare(CurrentPassword, user.Password);
         if (!isPasswordCorrect) {
-          return res.status(403).json({ message: 'La contraseña actual es incorrecta' });
+          return res.status(403).json({ message: 'La contraseña ingresada es incorrecta' });
         }
 
         // Verificar si hay nueva contraseña
@@ -308,7 +308,7 @@ app.put('/api/usuarios/:id', (req, res) => {
         const user = results[0];
         const isPasswordCorrect = await bcrypt.compare(AdminPassword, user.Password);
         if (!isPasswordCorrect) {
-          return res.status(403).json({ message: 'La contraseña actual es incorrecta' });
+          return res.status(403).json({ message: 'La contraseña ingreada es incorrecta' });
         }
         
         if (NewPassword) {
@@ -444,10 +444,112 @@ app.delete('/api/usuarios/:id', async (req, res) => {
   }
 });
 
+//-------------------------------------------------------------------------------------------------------------------
+//   Carrito
+//-------------------------------------------------------------------------------------------------------------------
+
+
+// Endpoint para agregar un producto al carrito
+app.post('/api/carrito', (req, res) => {
+  const { Quantity, Productos_ProductID, Usuarios_AccountID } = req.body;
+
+  const query = `
+    INSERT INTO Carrito (Usuarios_AccountID, Productos_ProductID, Quantity)
+    VALUES (?, ?, ?)
+  `;
+  //console.log(Usuarios_AccountID, " ", Productos_ProductID," ",Quantity);
+  db.query(query, [Usuarios_AccountID, Productos_ProductID, Quantity], (err, results) => {
+    if (err) {
+      console.error('Error insertando producto en el carrito:', err);
+      return res.status(500).json({ message: 'Error al añadir el producto al carrito' });
+    }
+
+    res.status(200).json({ message: 'Producto añadido al carrito correctamente' });
+  });
+});
+
+
+// Endpoint para obtener los productos del carrito de un usuario
+app.get('/api/carrito/:accountId', (req, res) => {
+  const { accountId } = req.params;
+
+  const query = `
+    SELECT c.Quantity, p.ProductID, p.ProductName, p.Price
+    FROM Carrito c
+    JOIN Productos p ON c.Productos_ProductID = p.ProductID
+    WHERE c.Usuarios_AccountID = ?
+  `;
+
+  db.query(query, [accountId], (err, results) => {
+    if (err) {
+      console.error('Error al obtener el carrito:', err);
+      return res.status(500).json({ message: 'Error al obtener el carrito' });
+    }
+
+    res.status(200).json(results);
+  });
+});
+
+// Endpoint para actualizar la cantidad de un producto en el carrito
+app.put('/api/carrito', (req, res) => {
+  const { Usuarios_AccountID, Productos_ProductID, Quantity } = req.body;
+
+  if (Quantity <= 0) {
+    const deleteQuery = `
+      DELETE FROM Carrito
+      WHERE Usuarios_AccountID = ? AND Productos_ProductID = ?
+    `;
+    db.query(deleteQuery, [Usuarios_AccountID, Productos_ProductID], (err, results) => {
+      if (err) {
+        console.error('Error al eliminar el producto del carrito:', err);
+        return res.status(500).json({ message: 'Error al eliminar el producto del carrito' });
+      }
+
+      return res.status(200).json({ message: 'Producto eliminado del carrito' });
+    });
+  } else {
+    const query = `
+      UPDATE Carrito
+      SET Quantity = ?
+      WHERE Usuarios_AccountID = ? AND Productos_ProductID = ?
+    `;
+    db.query(query, [Quantity, Usuarios_AccountID, Productos_ProductID], (err, results) => {
+      if (err) {
+        console.error('Error al actualizar la cantidad del producto en el carrito:', err);
+        return res.status(500).json({ message: 'Error al actualizar la cantidad del producto en el carrito' });
+      }
+
+      res.status(200).json({ message: 'Cantidad del producto actualizada en el carrito' });
+    });
+  }
+});
+
+// Endpoint para eliminar un producto del carrito
+app.delete('/api/carrito/:accountId/:productId', (req, res) => {
+  const { accountId, productId } = req.params;
+
+  const query = `
+    DELETE FROM Carrito
+    WHERE Usuarios_AccountID = ? AND Productos_ProductID = ?
+  `;
+
+  db.query(query, [accountId, productId], (err, results) => {
+    if (err) {
+      console.error('Error al eliminar el producto del carrito:', err);
+      return res.status(500).json({ message: 'Error al eliminar el producto del carrito' });
+    }
+
+    res.status(200).json({ message: 'Producto eliminado del carrito' });
+  });
+});
 
 
 
 
+
+//-------------------------------------------------------------------------------------------------------------------
+//   Activando puerto
+//-------------------------------------------------------------------------------------------------------------------
 
 app.listen(PORT, () => {
   console.log(`API de cuentas escuchando en puerto ${PORT}`);

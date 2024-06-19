@@ -23,12 +23,15 @@ const theme = createTheme({
 function App() {
   return (
     <ThemeProvider theme={theme}>
+            <Router>
       <AutentificacionProvider>  
       <CssBaseline />
-      <Router>
+
         <Navegacion />
-      </Router>
+
+
       </AutentificacionProvider>
+      </Router>
     </ThemeProvider>
   );
 }

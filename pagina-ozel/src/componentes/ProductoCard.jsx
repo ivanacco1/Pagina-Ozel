@@ -1,23 +1,29 @@
+// ProductoCard.jsx
 import React from 'react';
 import { Card, CardContent, CardMedia, Typography, CardActionArea, IconButton, Box } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import { useAuth } from './AutentificacionProvider';
+import { useNavigate } from 'react-router-dom';
 
 const ProductoCard = ({ producto, onEdit }) => {
   const { usuario } = useAuth();
-  //console.log(producto);
+  const navigate = useNavigate();
 
   const isAuthorized = usuario?.Role === 'admin' || usuario?.Role === 'gestor';
 
   const imageUrl = producto.ImageURL ? encodeURI(producto.ImageURL) : '';
 
+  const handleCardClick = () => {
+    navigate(`/producto/${producto.ProductID}`, { state: { producto } });
+  };
+
   return (
     <Card>
-      <CardActionArea>
+      <CardActionArea onClick={handleCardClick}>
         <CardMedia
           component="img"
           height="340"
-          image={imageUrl} // TODO: cambiar URL para que sea variable entre localhost y dominio
+          image={imageUrl}
           alt={producto.ProductName}
         />
         <CardContent>
@@ -32,7 +38,7 @@ const ProductoCard = ({ producto, onEdit }) => {
           </Typography>
           {isAuthorized && (
             <Box mt={1} textAlign="right">
-              <IconButton color="primary" onClick={() => onEdit(producto)}>
+              <IconButton color="primary" onClick={(e) => { e.stopPropagation(); onEdit(producto); }}>
                 <EditIcon />
               </IconButton>
             </Box>

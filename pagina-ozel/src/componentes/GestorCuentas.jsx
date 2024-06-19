@@ -34,7 +34,7 @@ const GestorCuentas = () => {
         console.error('Error al cargar la lista de usuarios:', response.statusText);
       }
     } catch (error) {
-      console.error('Error al cargar la lista de usuarios:', error.message);
+      console.error('Error al cargar la lista de usuarios:', error.response.data.message);
     } finally {
       setLoading(false);
     }
@@ -70,8 +70,8 @@ const GestorCuentas = () => {
         alert('Error al actualizar el rol del usuario.');
       }
     } catch (error) {
-      console.error('Error al actualizar el rol del usuario:', error.message);
-      alert('Error al actualizar el rol del usuario.');
+      console.error('Error al actualizar el rol del usuario:', error.response.data.message);
+      alert('Error al actualizar el rol del usuario: ' + error.response.data.message);
     } finally {
       setSelectedUser(null);
       setNewRole('');
@@ -115,8 +115,8 @@ const GestorCuentas = () => {
         alert('Error al restablecer la contraseña del usuario.');
       }
     } catch (error) {
-      console.error('Error al restablecer la contraseña del usuario:', error.message);
-      alert('Error al restablecer la contraseña del usuario.');
+      console.error('Error al restablecer la contraseña del usuario:', error.response.data.message);
+      alert('Error al restablecer la contraseña del usuario: ' + error.response.data.message);
     } finally {
       setSelectedUser(null);
       setAdminPassword('');
@@ -151,8 +151,8 @@ const GestorCuentas = () => {
         alert('Error al eliminar el usuario.');
       }
     } catch (error) {
-      console.error('Error al eliminar el usuario:', error.message);
-      alert('Error al eliminar el usuario.');
+      console.error('Error al eliminar el usuario:', error.response.data.message);
+      alert('Error al eliminar el usuario.' + error.response.data.message);
     } finally {
       setSelectedUser(null);
       setAdminPassword('');

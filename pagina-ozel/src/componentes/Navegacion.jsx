@@ -1,5 +1,4 @@
 // Navegacion.jsx
-
 import React, { useState } from 'react';
 import { Routes, Route, Link } from 'react-router-dom';
 import { useAuth } from './AutentificacionProvider';
@@ -7,10 +6,13 @@ import Login from './Login';
 import Register from './Register';
 import { AppBar, Toolbar, Typography, Button, TextField, IconButton, InputAdornment } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
+import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import '../estilos/Header.css';
 import Home from './Home';
 import MiCuenta from './MiCuenta';
-import CatalogoProductos from './CatalogoProductos'; // Importamos el nuevo componente
+import CatalogoProductos from './CatalogoProductos';
+import DetalleProducto from './DetalleProducto';
+import Carrito from './Carrito'; // Importa el componente Carrito
 
 const Navegacion = () => {
   const { usuario, estado, logout } = useAuth();
@@ -56,8 +58,8 @@ const Navegacion = () => {
             <Button className="nav-button" component={Link} to="/catalogo">PRODUCTOS</Button>
             <Button className="nav-button">AYUDA</Button>
             <Button className="nav-button">CONTACTO</Button>
-            <Button className="nav-button">
-              <i className="fas fa-shopping-cart"></i>
+            <Button className="nav-button" component={Link} to="/carrito">
+              <ShoppingCartIcon />
             </Button>
           </div>
         </div>
@@ -66,7 +68,9 @@ const Navegacion = () => {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/mi-cuenta" element={<MiCuenta />} />
-          <Route path="/catalogo" element={<CatalogoProductos />} /> {/* Añadir la nueva ruta */}
+          <Route path="/catalogo" element={<CatalogoProductos />} />
+          <Route path="/producto/:id" element={<DetalleProducto />} />
+          <Route path="/carrito" element={<Carrito />} /> 
         </Routes>
       </div>
       <Register

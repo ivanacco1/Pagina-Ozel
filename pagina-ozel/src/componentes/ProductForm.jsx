@@ -41,8 +41,8 @@ const ProductForm = ({ open, onClose, onFormSubmit, formMode, formValues, setFor
         if (response.status === 201) {
           alert('Producto añadido correctamente.');
         } else {
-          console.error('Error al añadir el producto:', response.statusText);
-          alert('Error al añadir el producto.');
+          console.error('Error al añadir el producto:', error.response.data.message);
+          alert('Error al añadir el producto: ' + error.response.data.message);
         }
       } else {
         const response = await axios.put(`http://localhost:3000/api/productos/${formValues.ProductID}`, formData, {
@@ -53,14 +53,14 @@ const ProductForm = ({ open, onClose, onFormSubmit, formMode, formValues, setFor
         if (response.status === 200) {
           alert('Producto actualizado correctamente.');
         } else {
-          console.error('Error al actualizar el producto:', response.statusText);
-          alert('Error al actualizar el producto.');
+          console.error('Error al actualizar el producto:', error.response.data.message);
+          alert('Error al actualizar el producto: '  + error.response.data.message);
         }
       }
       onFormSubmit();
     } catch (error) {
-      console.error('Error al enviar el formulario:', error.message);
-      alert('Error al enviar el formulario.');
+      console.error('Error al enviar el formulario:', error.response.data.message);
+      alert('Error al enviar el formulario: '  + error.response.data.message);
     } finally {
       onClose();
     }

@@ -5,7 +5,7 @@ import { TextField, Button, IconButton, InputAdornment } from '@mui/material';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import { useAuth } from './AutentificacionProvider';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom'; 
+//import { useNavigate } from 'react-router-dom'; 
 
 function Register({ isOpen, onClose }) {
   const { login } = useAuth();
@@ -17,7 +17,7 @@ function Register({ isOpen, onClose }) {
   const [mostrarContraseña, setMostrarContraseña] = useState(false);
   const [error, setError] = useState(null);
   const [registroExitoso, setRegistroExitoso] = useState(false);
-  const navigate = useNavigate(); // Inicializa useNavigate
+  //const navigate = useNavigate(); // Inicializa useNavigate
 
   const handleMostrarContraseñaClick = () => {
     setMostrarContraseña(!mostrarContraseña);
@@ -59,7 +59,7 @@ function Register({ isOpen, onClose }) {
         setTimeout(() => {
           setRegistroExitoso(false);
           onClose();
-          navigate('/'); // Redirige a la página de inicio
+          //navigate('/'); // Redirige a la página de inicio
         }, 3000);
       } else {
         const errorData = response.data;
@@ -73,17 +73,14 @@ function Register({ isOpen, onClose }) {
       }
     } catch (err) {
       if (err.response) {
-        const errorData = err.response.data;
-        if (err.response.status === 400) {
-          setError(errorData.message || 'Error al registrar la cuenta');
-        } else if (err.response.status === 500) {
-          setError('Error, el email ya está en uso.');
-        } else {
-          setError('Error al registrar la cuenta. Intente nuevamente más tarde.');
-        }
+        // Error de respuesta del servidor
+        
+          setError(err.response.data.message || 'Error al registrar la cuenta');
+
       } else {
-        setError('Error de red');
-      }
+        // La solicitud fue hecha pero no hubo respuesta
+        setError('No se pudo conectar con el servidor. Intente nuevamente más tarde.');
+      } 
     }
   };
 

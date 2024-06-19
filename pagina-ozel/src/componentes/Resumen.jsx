@@ -135,8 +135,8 @@ const Resumen = () => {
         alert('Error al actualizar los datos.');
       }
     } catch (error) {
-      console.error('Error al actualizar los datos:', error.message);
-      alert('Error al actualizar los datos.');
+      console.error('Error al actualizar los datos:', error.response.data.message);
+      alert('Error al actualizar los datos: ' + error.response.data.message);
     }
   };
 
