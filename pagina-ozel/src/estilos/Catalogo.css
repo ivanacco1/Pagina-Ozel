@@ -1,4 +1,82 @@
+
 .css-mhc70k-MuiGrid-root {
-    margin-top:15px!important;
-    margin-bottom:15px!important;
+    margin-top: 15px !important;
+    margin-bottom: 15px !important;
+}
+
+/* Filtro */
+.css-zbaamk-MuiGrid-root {
+    border: 1px solid #cccccc; 
+    border-radius: 15px;
+    padding: 15px; 
+    margin-left: 10px;
+    background-color: #f9f9f9; 
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); 
+    transition: box-shadow 0.3s ease, transform 0.3s ease; 
+}
+
+.css-zbaamk-MuiGrid-root:hover {
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2); 
+    transform: translateY(-1px); 
+}
+
+/* Producto */
+.css-919fip-MuiGrid-root {
+    border: 1px solid #cccccc; 
+    border-radius: 15px;
+    padding: 15px; 
+    margin-left: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); 
+    transition: box-shadow 0.3s ease, transform 0.3s ease;
+}
+
+/* Imagen del producto */
+.css-919fip-MuiGrid-root img {
+    max-width: 100%; 
+    max-height: 50rem; 
+    display: block; 
+    margin: 0 auto; 
+}
+
+/* Ajustes para responsive */
+@media (max-width: 1200px) {
+    .css-zbaamk-MuiGrid-root,
+    .css-919fip-MuiGrid-root {
+        margin-left: 5px;
+        padding: 10px;
+    }
+}
+
+@media (max-width: 992px) {
+    .css-zbaamk-MuiGrid-root,
+    .css-919fip-MuiGrid-root {
+        margin-left: 0;
+        padding: 8px;
+    }
+    .css-919fip-MuiGrid-root img {
+        max-height: 15rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .css-zbaamk-MuiGrid-root,
+    .css-919fip-MuiGrid-root {
+        padding: 5px;
+        margin: 0;
+        box-shadow: none;
+    }
+    .css-919fip-MuiGrid-root img {
+        max-height: 10rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .css-zbaamk-MuiGrid-root,
+    .css-919fip-MuiGrid-root {
+        padding: 3px;
+        border-radius: 10px;
+    }
+    .css-919fip-MuiGrid-root img {
+        max-height: 8rem;
+    }
 }
