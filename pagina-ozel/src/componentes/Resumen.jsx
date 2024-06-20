@@ -129,7 +129,7 @@ const Resumen = () => {
         alert('Datos actualizados correctamente.');
         setEditMode(false);
         setChangePasswordMode(false);
-        actualizarUsuario(updatedUser.user); // Actualizar el contexto con los nuevos datos del usuario
+        actualizarUsuario(updatedUser.user); // Actualiza el contexto con los nuevos datos del usuario
       } else {
         console.error('Error al actualizar los datos:', response.statusText);
         alert('Error al actualizar los datos.');

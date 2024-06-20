@@ -12,7 +12,7 @@ import Home from './Home';
 import MiCuenta from './MiCuenta';
 import CatalogoProductos from './CatalogoProductos';
 import DetalleProducto from './DetalleProducto';
-import Carrito from './Carrito'; // Importa el componente Carrito
+import Carrito from './Carrito'; 
 
 const Navegacion = () => {
   const { usuario, estado, logout } = useAuth();

@@ -24,7 +24,7 @@ const DetalleProducto = () => {
     }
 
     const cartItem = {
-      Quantity: 1, // Puedes cambiar esto para permitir la selección de cantidad
+      Quantity: 1, // TODO: Cambiar esto en el futuro
       Productos_ProductID: producto.ProductID,
       Usuarios_AccountID: usuario.UserId,
     };

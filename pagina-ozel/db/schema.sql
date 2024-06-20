@@ -184,11 +184,19 @@ MODIFY COLUMN Stock INT;
 --------------------------------------------
 
 
-INSERT INTO `Ozel`.`Usuarios` (`FirstName`, `LastName`, `Email`, `Password`, `Role`)
-SELECT 'admin', 'admin', 'admin@admin', '$2b$10$Q4wFA8jqiclpAmu.4Zh9iuby05eaQj1v.bEMvkr9HokTgbpZYj4Mq', 'admin'
+INSERT INTO `Ozel`.`Usuarios` (`FirstName`, `LastName`, `Email`, `Password`, `Role`, `DateRegistered`)
+SELECT 'admin', 'admin', 'admin@admin', '$2b$10$Q4wFA8jqiclpAmu.4Zh9iuby05eaQj1v.bEMvkr9HokTgbpZYj4Mq', 'admin', CURDATE()
 FROM DUAL
 WHERE NOT EXISTS (
     SELECT 1
     FROM `Ozel`.`Usuarios`
     WHERE `Email` = 'admin@admin'
 );
+
+
+-- Darle fecha a los usuarios registrados previo a logica de registro de fecha
+-------------------------------------------------------------------------------
+
+UPDATE `Ozel`.`Usuarios`
+SET `DateRegistered` = CURDATE()
+WHERE `DateRegistered` IS NULL;

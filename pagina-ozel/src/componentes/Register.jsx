@@ -5,7 +5,6 @@ import { TextField, Button, IconButton, InputAdornment } from '@mui/material';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import { useAuth } from './AutentificacionProvider';
 import axios from 'axios';
-//import { useNavigate } from 'react-router-dom'; 
 
 function Register({ isOpen, onClose }) {
   const { login } = useAuth();
@@ -17,7 +16,6 @@ function Register({ isOpen, onClose }) {
   const [mostrarContraseña, setMostrarContraseña] = useState(false);
   const [error, setError] = useState(null);
   const [registroExitoso, setRegistroExitoso] = useState(false);
-  //const navigate = useNavigate(); // Inicializa useNavigate
 
   const handleMostrarContraseñaClick = () => {
     setMostrarContraseña(!mostrarContraseña);

@@ -45,8 +45,8 @@ const Carrito = () => {
           Quantity: quantity,
         })
       ));
-      cargarCarrito(); // Recargar el carrito después de la actualización
-      setItemsToUpdate([]); // Limpiar la lista de elementos a actualizar
+      cargarCarrito(); // Recarga el carrito después de la actualización
+      setItemsToUpdate([]); // Limpia la lista de elementos a actualizar
       alert('Cantidades actualizadas, Lógica de Compra a implementar');
     } catch (error) {
       console.error('Error al actualizar la cantidad del producto:', error.message);
