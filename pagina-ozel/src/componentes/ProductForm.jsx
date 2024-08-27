@@ -66,8 +66,30 @@ const ProductForm = ({ open, onClose, onFormSubmit, formMode, formValues, setFor
     }
   };
 
+  const handleClose = () => {
+    // Resetea los valores del formulario y el nombre del archivo seleccionado
+    setFormValues({
+      ProductID: '',
+      ProductName: '',
+      Category: '',
+      Subcategory: '',
+      Price: '',
+      Stock: '',
+      Size: '',
+      Color: '',
+      Discount: '',
+      Description: '',
+      Image: null,
+      SaleStart: '',
+      SaleEnd: ''
+    });
+    setSelectedFileName('');
+    onClose();
+  };
+
+  
   return (
-    <Dialog open={open} onClose={onClose}>
+    <Dialog open={open} onClose={handleClose}>
       <DialogTitle>{formMode === 'add' ? 'Añadir Nuevo Producto' : 'Editar Producto'}</DialogTitle>
       <DialogContent>
         <Box
@@ -183,7 +205,7 @@ const ProductForm = ({ open, onClose, onFormSubmit, formMode, formValues, setFor
         </Box>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose} color="primary">Cancelar</Button>
+        <Button onClick={handleClose} color="primary">Cancelar</Button>
         <Button onClick={handleSubmit} color="primary" variant="contained">
           {formMode === 'add' ? 'Añadir' : 'Guardar'}
         </Button>

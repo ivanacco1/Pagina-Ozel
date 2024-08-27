@@ -69,12 +69,13 @@ const Carrito = () => {
       }
       return item;
     });
-
+  
     setCarrito(updatedCart);
-
-
-      setItemsToUpdate(prevItems => [...prevItems, { productId, quantity: newQuantity }]);
-    }
+    setItemsToUpdate(prevItems => [...prevItems, { productId, quantity: newQuantity }]);
+  
+    // Recalcular el costo total después de actualizar la cantidad
+    calcularCostoTotal(updatedCart);
+  };
 
 
   return (
