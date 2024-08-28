@@ -1,9 +1,25 @@
-import React, { useState } from 'react';
-import { Dialog, DialogTitle, DialogContent, DialogActions, Box, TextField, Button, Typography } from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import { Dialog, DialogTitle, DialogContent, DialogActions, Box, TextField, Button, Typography, MenuItem } from '@mui/material';
 import axios from 'axios';
+import CategoriaModal from './CategoriaModal';
 
 const ProductForm = ({ open, onClose, onFormSubmit, formMode, formValues, setFormValues }) => {
   const [selectedFileName, setSelectedFileName] = useState('');
+  const [categorias, setCategorias] = useState([]);
+  const [isCategoriaModalOpen, setIsCategoriaModalOpen] = useState(false);
+
+  useEffect(() => {
+    fetchCategorias();
+  }, []);
+
+  const fetchCategorias = async () => {
+    try {
+      const response = await axios.get('http://localhost:3000/api/categorias');
+      setCategorias(response.data);
+    } catch (error) {
+      console.error('Error al cargar las categorías:', error.message);
+    }
+  };
 
   const handleFormChange = (e) => {
     const { name, value } = e.target;
@@ -87,6 +103,15 @@ const ProductForm = ({ open, onClose, onFormSubmit, formMode, formValues, setFor
     onClose();
   };
 
+  const handleCategoriaSave = ({ categoria, subcategoria }) => {
+    setFormValues((prevValues) => ({
+      ...prevValues,
+      Category: categoria,
+      Subcategory: subcategoria,
+    }));
+    fetchCategorias();
+  };
+
   
   return (
     <Dialog open={open} onClose={handleClose}>
@@ -108,19 +133,38 @@ const ProductForm = ({ open, onClose, onFormSubmit, formMode, formValues, setFor
             onChange={handleFormChange}
           />
           <TextField
+            select
             required
             label="Categoría"
             name="Category"
             value={formValues.Category}
             onChange={handleFormChange}
-          />
+          >
+            {categorias.map((cat) => (
+              <MenuItem key={cat.id} value={cat.categoria}>
+                {cat.categoria}
+              </MenuItem>
+            ))}
+          </TextField>
           <TextField
+            select
             required
             label="Subcategoría"
             name="Subcategory"
             value={formValues.Subcategory}
             onChange={handleFormChange}
-          />
+          >
+            {categorias
+              .filter((cat) => cat.categoria === formValues.Category)
+              .map((cat) => (
+                <MenuItem key={cat.id} value={cat.subcategoria}>
+                  {cat.subcategoria}
+                </MenuItem>
+              ))}
+          </TextField>
+          <Button variant="contained" color="primary" onClick={() => setIsCategoriaModalOpen(true)}>
+            Gestionar Categorías
+          </Button>
           <TextField
             required
             label="Precio"
@@ -210,6 +254,14 @@ const ProductForm = ({ open, onClose, onFormSubmit, formMode, formValues, setFor
           {formMode === 'add' ? 'Añadir' : 'Guardar'}
         </Button>
       </DialogActions>
+
+      <CategoriaModal
+        open={isCategoriaModalOpen}
+        onClose={() => {
+          setIsCategoriaModalOpen(false);
+          fetchCategorias();}}
+        onSave={handleCategoriaSave}
+      />
     </Dialog>
   );
 };

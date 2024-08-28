@@ -282,9 +282,59 @@ app.put('/api/productos/:id', upload.single('Image'), (req, res) => {
 });
 
 
+// Obtener todas las categorías
+app.get('/api/categorias', (req, res) => {
+  const query = 'SELECT * FROM Categorias';
 
+  db.query(query, (err, results) => {
+    if (err) {
+      console.error('Error al obtener categorías:', err);
+      return res.status(500).json({ message: 'Error al obtener categorías' });
+    }
 
+    res.status(200).json(results);
+  });
+});
 
+// Crear una nueva categoría
+app.post('/api/categorias', (req, res) => {
+  const { categoria, subcategoria } = req.body;
+
+  if (!categoria || !subcategoria) {
+    return res.status(400).json({ message: 'Por favor, provea una categoría y subcategoría.' });
+  }
+
+  const query = 'INSERT INTO Categorias (categoria, subcategoria) VALUES (?, ?)';
+
+  db.query(query, [categoria, subcategoria], (err, result) => {
+    if (err) {
+      console.error('Error al crear categoría:', err);
+      return res.status(500).json({ message: 'Error al crear categoría' });
+    }
+
+    res.status(201).json({ message: 'Categoría creada exitosamente', categoryId: result.insertId });
+  });
+});
+
+// Eliminar una categoría
+app.delete('/api/categorias/:id', (req, res) => {
+  const { id } = req.params;
+
+  const query = 'DELETE FROM Categorias WHERE id = ?';
+
+  db.query(query, [id], (err, result) => {
+    if (err) {
+      console.error('Error al eliminar categoría:', err);
+      return res.status(500).json({ message: 'Error al eliminar categoría' });
+    }
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: 'Categoría no encontrada' });
+    }
+
+    res.status(200).json({ message: 'Categoría eliminada exitosamente' });
+  });
+});
 
 
 // Ruta estática para servir los archivos de imagen
