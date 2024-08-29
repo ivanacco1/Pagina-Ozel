@@ -12,7 +12,12 @@ const CategoriaModal = ({ open, onClose, onCategoriaCreated }) => {
     const fetchCategorias = async () => {
       try {
         const response = await axios.get('http://localhost:3000/api/categorias');
-        setCategorias(response.data);
+        // Filtrar categorías duplicadas antes de establecer el estado
+        const uniqueCategorias = response.data.filter(
+          (cat, index, self) =>
+            index === self.findIndex((c) => c.categoria === cat.categoria)
+        );
+        setCategorias(uniqueCategorias);
       } catch (error) {
         console.error('Error al cargar las categorías:', error);
       }
@@ -36,7 +41,6 @@ const CategoriaModal = ({ open, onClose, onCategoriaCreated }) => {
         subcategoria,
       });
 
-      //onCategoriaCreated(response.data);
       onClose();
     } catch (error) {
       console.error('Error al crear la categoría:', error);

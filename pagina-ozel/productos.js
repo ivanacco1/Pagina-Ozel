@@ -337,6 +337,83 @@ app.delete('/api/categorias/:id', (req, res) => {
 });
 
 
+// Obtener todos los colores
+app.get('/api/colores', (req, res) => {
+  const query = 'SELECT * FROM Colores';
+  db.query(query, (err, results) => {
+      if (err) {
+          console.error('Error al obtener colores:', err);
+          return res.status(500).json({ message: 'Error al obtener colores' });
+      }
+      res.status(200).json(results);
+  });
+});
+
+// Crear un nuevo color
+app.post('/api/colores', (req, res) => {
+  const { color } = req.body;
+  const query = 'INSERT INTO Colores (color) VALUES (?)';
+  db.query(query, [color], (err, result) => {
+      if (err) {
+          console.error('Error al agregar color:', err);
+          return res.status(500).json({ message: 'Error al agregar color' });
+      }
+      res.status(201).json({ message: 'Color agregado con éxito' });
+  });
+});
+
+// Eliminar un color
+app.delete('/api/colores/:idColor', (req, res) => {
+  const { idColor } = req.params;
+  const query = 'DELETE FROM Colores WHERE idColor = ?';
+  db.query(query, [idColor], (err, result) => {
+      if (err) {
+          console.error('Error al eliminar color:', err);
+          return res.status(500).json({ message: 'Error al eliminar color' });
+      }
+      res.status(200).json({ message: 'Color eliminado con éxito' });
+  });
+});
+
+
+// Obtener todas las tallas
+app.get('/api/tallas', (req, res) => {
+  const query = 'SELECT * FROM Tallas';
+  db.query(query, (err, results) => {
+      if (err) {
+          console.error('Error al obtener tallas:', err);
+          return res.status(500).json({ message: 'Error al obtener tallas' });
+      }
+      res.status(200).json(results);
+  });
+});
+
+// Crear una nueva talla
+app.post('/api/tallas', (req, res) => {
+  const { talla } = req.body;
+  const query = 'INSERT INTO Tallas (talla) VALUES (?)';
+  db.query(query, [talla], (err, result) => {
+      if (err) {
+          console.error('Error al agregar talla:', err);
+          return res.status(500).json({ message: 'Error al agregar talla' });
+      }
+      res.status(201).json({ message: 'Talla agregada con éxito' });
+  });
+});
+
+// Eliminar una talla
+app.delete('/api/tallas/:idTalla', (req, res) => {
+  const { idTalla } = req.params;
+  const query = 'DELETE FROM Tallas WHERE idTalla = ?';
+  db.query(query, [idTalla], (err, result) => {
+      if (err) {
+          console.error('Error al eliminar talla:', err);
+          return res.status(500).json({ message: 'Error al eliminar talla' });
+      }
+      res.status(200).json({ message: 'Talla eliminada con éxito' });
+  });
+});
+
 // Ruta estática para servir los archivos de imagen
 app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
 

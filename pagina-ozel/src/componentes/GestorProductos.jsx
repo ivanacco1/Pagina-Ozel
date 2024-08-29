@@ -130,6 +130,8 @@ const GestorProductos = () => {
     isValueIncluded(product.Subcategory, searchTerm)
   );
 
+  
+
   return (
     <>
       <Typography variant="h5" gutterBottom mt={4}>Gestor de Productos</Typography>

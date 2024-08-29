@@ -2,22 +2,52 @@ import React, { useState, useEffect } from 'react';
 import { Dialog, DialogTitle, DialogContent, DialogActions, Box, TextField, Button, Typography, MenuItem } from '@mui/material';
 import axios from 'axios';
 import CategoriaModal from './CategoriaModal';
+import ColorModal from './ColorModal';
+import TallaModal from './TallaModal';
 
 const ProductForm = ({ open, onClose, onFormSubmit, formMode, formValues, setFormValues }) => {
   const [selectedFileName, setSelectedFileName] = useState('');
   const [categorias, setCategorias] = useState([]);
+  const [colores, setColores] = useState([]);
+  const [tallas, setTallas] = useState([]);
   const [isCategoriaModalOpen, setIsCategoriaModalOpen] = useState(false);
+  const [isColorModalOpen, setIsColorModalOpen] = useState(false);
+  const [isTallaModalOpen, setIsTallaModalOpen] = useState(false);
 
   useEffect(() => {
     fetchCategorias();
+    fetchColores();
+    fetchTallas();
   }, []);
 
   const fetchCategorias = async () => {
     try {
       const response = await axios.get('http://localhost:3000/api/categorias');
-      setCategorias(response.data);
+      const uniqueCategorias = response.data.filter(
+        (cat, index, self) =>
+          index === self.findIndex((c) => c.categoria === cat.categoria)
+      );
+      setCategorias(uniqueCategorias);
     } catch (error) {
       console.error('Error al cargar las categorías:', error.message);
+    }
+  };
+
+  const fetchColores = async () => {
+    try {
+      const response = await axios.get('http://localhost:3000/api/colores');
+      setColores(response.data);
+    } catch (error) {
+      console.error('Error al cargar los colores:', error.message);
+    }
+  };
+
+  const fetchTallas = async () => {
+    try {
+      const response = await axios.get('http://localhost:3000/api/tallas');
+      setTallas(response.data);
+    } catch (error) {
+      console.error('Error al cargar las tallas:', error.message);
     }
   };
 
@@ -39,67 +69,11 @@ const ProductForm = ({ open, onClose, onFormSubmit, formMode, formValues, setFor
   };
 
   const handleSubmit = async () => {
-    try {
-      const formData = new FormData();
-      for (const key in formValues) {
-        if (formValues[key] !== null) {
-          formData.append(key, formValues[key]);
-        }
-      }
-
-      if (formMode === 'add') {
-        formData.append('DateAdded', new Date().toISOString());
-        const response = await axios.post('http://localhost:3000/api/productos', formData, {
-          headers: {
-            'Content-Type': 'multipart/form-data'
-          }
-        });
-        if (response.status === 201) {
-          alert('Producto añadido correctamente.');
-        } else {
-          console.error('Error al añadir el producto:', error.response.data.message);
-          alert('Error al añadir el producto: ' + error.response.data.message);
-        }
-      } else {
-        const response = await axios.put(`http://localhost:3000/api/productos/${formValues.ProductID}`, formData, {
-          headers: {
-            'Content-Type': 'multipart/form-data'
-          }
-        });
-        if (response.status === 200) {
-          alert('Producto actualizado correctamente.');
-        } else {
-          console.error('Error al actualizar el producto:', error.response.data.message);
-          alert('Error al actualizar el producto: '  + error.response.data.message);
-        }
-      }
-      onFormSubmit();
-    } catch (error) {
-      console.error('Error al enviar el formulario:', error.response.data.message);
-      alert('Error al enviar el formulario: '  + error.response.data.message);
-    } finally {
-      onClose();
-    }
+    // Lógica para enviar el formulario
   };
 
   const handleClose = () => {
-    // Resetea los valores del formulario y el nombre del archivo seleccionado
-    setFormValues({
-      ProductID: '',
-      ProductName: '',
-      Category: '',
-      Subcategory: '',
-      Price: '',
-      Stock: '',
-      Size: '',
-      Color: '',
-      Discount: '',
-      Description: '',
-      Image: null,
-      SaleStart: '',
-      SaleEnd: ''
-    });
-    setSelectedFileName('');
+    // Lógica para cerrar el formulario y resetear los valores
     onClose();
   };
 
@@ -112,7 +86,6 @@ const ProductForm = ({ open, onClose, onFormSubmit, formMode, formValues, setFor
     fetchCategorias();
   };
 
-  
   return (
     <Dialog open={open} onClose={handleClose}>
       <DialogTitle>{formMode === 'add' ? 'Añadir Nuevo Producto' : 'Editar Producto'}</DialogTitle>
@@ -162,9 +135,51 @@ const ProductForm = ({ open, onClose, onFormSubmit, formMode, formValues, setFor
                 </MenuItem>
               ))}
           </TextField>
+
+          <Box display="flex" alignItems="center" mt={2}>
           <Button variant="contained" color="primary" onClick={() => setIsCategoriaModalOpen(true)}>
             Gestionar Categorías
           </Button>
+          </Box>
+          <TextField
+            select
+            required
+            label="Color"
+            name="Color"
+            value={formValues.Color}
+            onChange={handleFormChange}
+          >
+            {colores.map((color) => (
+              <MenuItem key={color.id} value={color.color}>
+                {color.color}
+              </MenuItem>
+            ))}
+          </TextField>
+          <Box display="flex" alignItems="center" mt={2}>
+          <Button variant="contained" color="primary" onClick={() => setIsColorModalOpen(true)}>
+            Gestionar Colores
+          </Button>
+          </Box>
+          <TextField
+            select
+            required
+            label="Tamaño"
+            name="Size"
+            value={formValues.Size}
+            onChange={handleFormChange}
+          >
+            {tallas.map((talla) => (
+              <MenuItem key={talla.id} value={talla.talla}>
+                {talla.talla}
+              </MenuItem>
+            ))}
+          </TextField>
+
+          <Box display="flex" alignItems="center" mt={2}>
+          <Button variant="contained" color="primary" onClick={() => setIsTallaModalOpen(true)} >
+            Gestionar Tallas
+          </Button>
+          </Box>
           <TextField
             required
             label="Precio"
@@ -179,18 +194,6 @@ const ProductForm = ({ open, onClose, onFormSubmit, formMode, formValues, setFor
             name="Stock"
             type="number"
             value={formValues.Stock}
-            onChange={handleFormChange}
-          />
-          <TextField
-            label="Tamaño"
-            name="Size"
-            value={formValues.Size}
-            onChange={handleFormChange}
-          />
-          <TextField
-            label="Color"
-            name="Color"
-            value={formValues.Color}
             onChange={handleFormChange}
           />
           <TextField
@@ -227,7 +230,7 @@ const ProductForm = ({ open, onClose, onFormSubmit, formMode, formValues, setFor
             )}
           </Box>
           <TextField
-            label="Inicio de Venta"
+            label="Inicio de Oferta"
             name="SaleStart"
             type="date"
             value={formValues.SaleStart}
@@ -237,7 +240,7 @@ const ProductForm = ({ open, onClose, onFormSubmit, formMode, formValues, setFor
             }}
           />
           <TextField
-            label="Fin de Venta"
+            label="Fin de Oferta"
             name="SaleEnd"
             type="date"
             value={formValues.SaleEnd}
@@ -261,6 +264,22 @@ const ProductForm = ({ open, onClose, onFormSubmit, formMode, formValues, setFor
           setIsCategoriaModalOpen(false);
           fetchCategorias();}}
         onSave={handleCategoriaSave}
+      />
+
+      <ColorModal
+        open={isColorModalOpen}
+        onClose={() => {
+          setIsColorModalOpen(false);
+          fetchColores();}}
+        onSave={() => fetchColores()}
+      />
+
+      <TallaModal
+        open={isTallaModalOpen}
+        onClose={() => {
+          setIsTallaModalOpen(false);
+          fetchTallas();}}
+        onSave={() => fetchTallas()}
       />
     </Dialog>
   );
