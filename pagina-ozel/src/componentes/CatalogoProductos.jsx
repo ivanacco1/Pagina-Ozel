@@ -9,22 +9,13 @@ import '../estilos/Catalogo.css';
 const CatalogoProductos = () => {
   const { usuario } = useAuth();
   const [productos, setProductos] = useState([]);
+  const [categorias, setCategorias] = useState([]);
+  const [colores, setColores] = useState([]);
+  const [tallas, setTallas] = useState([]);
   const [filtros, setFiltros] = useState({
-    categoria: {
-      conjunto: false,
-      superior: false,
-      inferior: false
-    },
-    talla: {
-      small: false,
-      medium: false,
-      large: false
-    },
-    color: {
-      verde: false,
-      rojo: false,
-      negro: false
-    }
+    categoria: {},
+    talla: {},
+    color: {},
   });
   const [formValues, setFormValues] = useState({
     ProductID: '',
@@ -46,6 +37,7 @@ const CatalogoProductos = () => {
 
   useEffect(() => {
     cargarProductos();
+    cargarFiltros();
   }, []);
 
   const cargarProductos = async () => {
@@ -61,16 +53,68 @@ const CatalogoProductos = () => {
     }
   };
 
+  const cargarFiltros = async () => {
+    try {
+      const [categoriasRes, coloresRes, tallasRes] = await Promise.all([
+        axios.get('http://localhost:3000/api/categorias'),
+        axios.get('http://localhost:3000/api/colores'),
+        axios.get('http://localhost:3000/api/tallas'),
+      ]);
+  
+      setCategorias(categoriasRes.data);
+      setColores(coloresRes.data);
+      setTallas(tallasRes.data);
+  
+      const categoriasFiltros = categoriasRes.data.reduce((acc, cat) => {
+        if (!acc[cat.categoria]) {
+          acc[cat.categoria] = {
+            isChecked: false,
+            subcategorias: {}
+          };
+        }
+        acc[cat.categoria].subcategorias[cat.subcategoria] = false;
+        return acc;
+      }, {});
+  
+      setFiltros({
+        categoria: categoriasFiltros,
+        talla: tallasRes.data.reduce((acc, talla) => ({ ...acc, [talla.talla]: false }), {}),
+        color: coloresRes.data.reduce((acc, color) => ({ ...acc, [color.color]: false }), {}),
+      });
+    } catch (error) {
+      console.error('Error al cargar filtros:', error.message);
+    }
+  };
+
   const handleFiltroChange = (event) => {
     const { name, checked } = event.target;
-    const [tipo, valor] = name.split('.');
-    setFiltros((prevFiltros) => ({
-      ...prevFiltros,
-      [tipo]: {
-        ...prevFiltros[tipo],
-        [valor]: checked
+    const [tipo, categoria, subcategoria] = name.split('.');
+  
+    setFiltros((prevFiltros) => {
+      if (tipo === 'categoria' && subcategoria) {
+        return {
+          ...prevFiltros,
+          categoria: {
+            ...prevFiltros.categoria,
+            [categoria]: {
+              ...prevFiltros.categoria[categoria],
+              subcategorias: {
+                ...prevFiltros.categoria[categoria].subcategorias,
+                [subcategoria]: checked
+              }
+            }
+          }
+        };
+      } else {
+        return {
+          ...prevFiltros,
+          [tipo]: {
+            ...prevFiltros[tipo],
+            [categoria]: checked
+          }
+        };
       }
-    }));
+    });
   };
 
   const filtrarProductos = () => {
@@ -101,7 +145,7 @@ const CatalogoProductos = () => {
         return true; // Mostrar todos si ningún filtro está seleccionado
       });
   
-      // Mostrar el producto si cumple con al menos un filtro
+      // Mostrar el producto si cumple con todos los filtros
       return categoriaFiltro && tallaFiltro && colorFiltro;
     });
   };
@@ -125,7 +169,7 @@ const CatalogoProductos = () => {
           <FormControl component="fieldset">
             <Typography variant="subtitle1">Categoría</Typography>
             <FormGroup>
-              {['conjunto', 'superior', 'inferior'].map((categoria) => (
+              {Object.keys(filtros.categoria).map((categoria) => (
                 <FormControlLabel
                   key={categoria}
                   control={<Checkbox checked={filtros.categoria[categoria]} onChange={handleFiltroChange} name={`categoria.${categoria}`} />}
@@ -135,7 +179,7 @@ const CatalogoProductos = () => {
             </FormGroup>
             <Typography variant="subtitle1">Talla</Typography>
             <FormGroup>
-              {['small', 'medium', 'large'].map((talla) => (
+              {Object.keys(filtros.talla).map((talla) => (
                 <FormControlLabel
                   key={talla}
                   control={<Checkbox checked={filtros.talla[talla]} onChange={handleFiltroChange} name={`talla.${talla}`} />}
@@ -145,7 +189,7 @@ const CatalogoProductos = () => {
             </FormGroup>
             <Typography variant="subtitle1">Color</Typography>
             <FormGroup>
-              {['verde', 'rojo', 'negro'].map((color) => (
+              {Object.keys(filtros.color).map((color) => (
                 <FormControlLabel
                   key={color}
                   control={<Checkbox checked={filtros.color[color]} onChange={handleFiltroChange} name={`color.${color}`} />}

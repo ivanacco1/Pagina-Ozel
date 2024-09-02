@@ -69,11 +69,67 @@ const ProductForm = ({ open, onClose, onFormSubmit, formMode, formValues, setFor
   };
 
   const handleSubmit = async () => {
-    // Lógica para enviar el formulario
+    try {
+      const formData = new FormData();
+      for (const key in formValues) {
+        if (formValues[key] !== null) {
+          formData.append(key, formValues[key]);
+        }
+      }
+
+      if (formMode === 'add') {
+        formData.append('DateAdded', new Date().toISOString());
+        const response = await axios.post('http://localhost:3000/api/productos', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        });
+        if (response.status === 201) {
+          alert('Producto añadido correctamente.');
+        } else {
+          console.error('Error al añadir el producto:', error.response.data.message);
+          alert('Error al añadir el producto: ' + error.response.data.message);
+        }
+      } else {
+        const response = await axios.put(`http://localhost:3000/api/productos/${formValues.ProductID}`, formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        });
+        if (response.status === 200) {
+          alert('Producto actualizado correctamente.');
+        } else {
+          console.error('Error al actualizar el producto:', error.response.data.message);
+          alert('Error al actualizar el producto: '  + error.response.data.message);
+        }
+      }
+      onFormSubmit();
+    } catch (error) {
+      console.error('Error al enviar el formulario:', error.response.data.message);
+      alert('Error al enviar el formulario: '  + error.response.data.message);
+    } finally {
+      onClose();
+    }
   };
 
   const handleClose = () => {
-    // Lógica para cerrar el formulario y resetear los valores
+    // Resetea los valores del formulario y el nombre del archivo seleccionado
+    setFormValues({
+      ProductID: '',
+      ProductName: '',
+      Category: '',
+      Subcategory: '',
+      Price: '',
+      Stock: '',
+      Size: '',
+      Color: '',
+      Discount: '',
+      Description: '',
+      Image: null,
+      SaleStart: '',
+      SaleEnd: ''
+    });
+    setSelectedFileName('');
     onClose();
   };
 
