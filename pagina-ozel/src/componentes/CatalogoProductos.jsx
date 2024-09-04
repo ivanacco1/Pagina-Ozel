@@ -72,27 +72,53 @@ const CatalogoProductos = () => {
             subcategorias: {}
           };
         }
-        acc[cat.categoria].subcategorias[cat.subcategoria] = false;
+        acc[cat.categoria].subcategorias[cat.subcategoria] = {
+          isChecked: false,
+        };
         return acc;
       }, {});
+
+      const TallasFiltros = tallasRes.data.reduce((acc, talla) => {
+          acc[talla.talla] = {
+            isChecked: false,
+          };
+
+        return acc;
+      }, {});
+
+      const ColoresFiltros = coloresRes.data.reduce((acc, color) => {
+        acc[color.color] = {
+          isChecked: false,
+        };
+
+      return acc;
+    }, {});
+      
   
       setFiltros({
         categoria: categoriasFiltros,
-        talla: tallasRes.data.reduce((acc, talla) => ({ ...acc, [talla.talla]: false }), {}),
-        color: coloresRes.data.reduce((acc, color) => ({ ...acc, [color.color]: false }), {}),
+        talla: TallasFiltros,
+        color: ColoresFiltros,
       });
     } catch (error) {
       console.error('Error al cargar filtros:', error.message);
     }
+
   };
+
+  useEffect(() => {
+    console.log('Filtros actualizados:', filtros);
+  }, [filtros]);
 
   const handleFiltroChange = (event) => {
     const { name, checked } = event.target;
-    const [tipo, categoria, subcategoria] = name.split('.');
-  
-    setFiltros((prevFiltros) => {
-      if (tipo === 'categoria' && subcategoria) {
-        return {
+    const [tipo, ...rest] = name.split('.');
+    
+    if (tipo === 'categoria') {
+      const [categoria, subcategoria] = rest;
+      
+      if (subcategoria) {
+        setFiltros((prevFiltros) => ({
           ...prevFiltros,
           categoria: {
             ...prevFiltros.categoria,
@@ -100,52 +126,73 @@ const CatalogoProductos = () => {
               ...prevFiltros.categoria[categoria],
               subcategorias: {
                 ...prevFiltros.categoria[categoria].subcategorias,
-                [subcategoria]: checked
+                [subcategoria]: { isChecked: checked }
               }
             }
           }
-        };
+        }));
       } else {
-        return {
+        setFiltros((prevFiltros) => ({
           ...prevFiltros,
-          [tipo]: {
-            ...prevFiltros[tipo],
-            [categoria]: checked
+          categoria: {
+            ...prevFiltros.categoria,
+            [categoria]: {
+              ...prevFiltros.categoria[categoria],
+              isChecked: checked
+            }
           }
-        };
+        }));
       }
-    });
+    } else {
+      setFiltros((prevFiltros) => ({
+        ...prevFiltros,
+        [tipo]: {
+          ...prevFiltros[tipo],
+          [rest[0]]: { isChecked: checked }
+        }
+      }));
+    }
   };
 
   const filtrarProductos = () => {
+    // Comprobar si hay algún filtro seleccionado
+    const tieneFiltroSeleccionado = 
+      Object.values(filtros.categoria).some(cat => cat.isChecked || 
+        Object.values(cat.subcategorias).some(sub => sub.isChecked)) ||
+      Object.values(filtros.talla).some(talla => talla.isChecked) ||
+      Object.values(filtros.color).some(color => color.isChecked);
+  
+    if (!tieneFiltroSeleccionado) {
+      // Si no hay filtros seleccionados, devolver todos los productos
+      return productos;
+    }
+  
     return productos.filter((producto) => {
-      const { Category, Size, Color } = producto;
-      
-      // Verificar filtros de categoría
-      const categoriaFiltro = Object.keys(filtros.categoria).every(key => {
-        if (filtros.categoria[key]) {
-          return Category.toLowerCase().includes(key.toLowerCase());
-        }
-        return true; // Mostrar todos si ningún filtro está seleccionado
+      const { Category, Subcategory, Size, Color } = producto;
+  
+      // Verificar filtros de categoría y subcategoría
+      const categoriaFiltro = Object.keys(filtros.categoria).every((categoria) => {
+        if (!filtros.categoria[categoria].isChecked) return true; // Ignorar si no está seleccionado
+        const subcategoriasSeleccionadas = Object.values(filtros.categoria[categoria].subcategorias).some(subCat => subCat.isChecked);
+        return (
+          Category === categoria &&
+          (Object.keys(filtros.categoria[categoria].subcategorias).length === 0 || 
+          filtros.categoria[categoria].subcategorias[Subcategory]?.isChecked || !subcategoriasSeleccionadas)
+        );
       });
   
       // Verificar filtros de talla
       const tallaFiltro = Object.keys(filtros.talla).every(key => {
-        if (filtros.talla[key]) {
-          return Size.toLowerCase().includes(key.toLowerCase());
-        }
-        return true; // Mostrar todos si ningún filtro está seleccionado
+        if (!filtros.talla[key].isChecked) return true; // Ignorar si no está seleccionado
+        return Size === key;
       });
   
       // Verificar filtros de color
       const colorFiltro = Object.keys(filtros.color).every(key => {
-        if (filtros.color[key]) {
-          return Color.toLowerCase().includes(key.toLowerCase());
-        }
-        return true; // Mostrar todos si ningún filtro está seleccionado
+        if (!filtros.color[key].isChecked) return true; // Ignorar si no está seleccionado
+        return Color === key;
       });
   
-      // Mostrar el producto si cumple con todos los filtros
       return categoriaFiltro && tallaFiltro && colorFiltro;
     });
   };
@@ -164,41 +211,75 @@ const CatalogoProductos = () => {
         Catálogo de Productos
       </Typography>
       <Grid container spacing={2}>
-        <Grid item xs={12} sm={3} md={3}>
-          <Typography variant="h6">Filtrar por</Typography>
-          <FormControl component="fieldset">
-            <Typography variant="subtitle1">Categoría</Typography>
-            <FormGroup>
-              {Object.keys(filtros.categoria).map((categoria) => (
-                <FormControlLabel
-                  key={categoria}
-                  control={<Checkbox checked={filtros.categoria[categoria]} onChange={handleFiltroChange} name={`categoria.${categoria}`} />}
-                  label={categoria.charAt(0).toUpperCase() + categoria.slice(1)}
-                />
-              ))}
-            </FormGroup>
-            <Typography variant="subtitle1">Talla</Typography>
-            <FormGroup>
-              {Object.keys(filtros.talla).map((talla) => (
-                <FormControlLabel
-                  key={talla}
-                  control={<Checkbox checked={filtros.talla[talla]} onChange={handleFiltroChange} name={`talla.${talla}`} />}
-                  label={talla.charAt(0).toUpperCase() + talla.slice(1)}
-                />
-              ))}
-            </FormGroup>
-            <Typography variant="subtitle1">Color</Typography>
-            <FormGroup>
-              {Object.keys(filtros.color).map((color) => (
-                <FormControlLabel
-                  key={color}
-                  control={<Checkbox checked={filtros.color[color]} onChange={handleFiltroChange} name={`color.${color}`} />}
-                  label={color.charAt(0).toUpperCase() + color.slice(1)}
-                />
-              ))}
-            </FormGroup>
-          </FormControl>
-        </Grid>
+      <Grid item xs={12} sm={3} md={3}>
+  <Typography variant="h6">Filtrar por</Typography>
+  <FormControl component="fieldset">
+    <Typography variant="subtitle1">Categoría</Typography>
+    <FormGroup>
+      {Object.keys(filtros.categoria).map((categoria) => (
+        <Box key={categoria} ml={1}>
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={filtros.categoria[categoria].isChecked}
+                onChange={handleFiltroChange}
+                name={`categoria.${categoria}`}
+              />
+            }
+            label={categoria.charAt(0).toUpperCase() + categoria.slice(1)}
+          />
+          <Box ml={2}>
+            {Object.keys(filtros.categoria[categoria].subcategorias).map((subcategoria) => (
+              <FormControlLabel
+                key={subcategoria}
+                control={
+                  <Checkbox
+                    checked={filtros.categoria[categoria].subcategorias[subcategoria].isChecked}
+                    onChange={handleFiltroChange}
+                    name={`categoria.${categoria}.${subcategoria}`}
+                  />
+                }
+                label={subcategoria.charAt(0).toUpperCase() + subcategoria.slice(1)}
+              />
+            ))}
+          </Box>
+        </Box>
+      ))}
+    </FormGroup>
+    <Typography variant="subtitle1">Talla</Typography>
+    <FormGroup>
+      {Object.keys(filtros.talla).map((talla) => (
+        <FormControlLabel
+          key={talla}
+          control={
+            <Checkbox
+              checked={filtros.talla[talla].isChecked}
+              onChange={handleFiltroChange}
+              name={`talla.${talla}`}
+            />
+          }
+          label={talla.charAt(0).toUpperCase() + talla.slice(1)}
+        />
+      ))}
+    </FormGroup>
+    <Typography variant="subtitle1">Color</Typography>
+    <FormGroup>
+      {Object.keys(filtros.color).map((color) => (
+        <FormControlLabel
+          key={color}
+          control={
+            <Checkbox
+              checked={filtros.color[color].isChecked}
+              onChange={handleFiltroChange}
+              name={`color.${color}`}
+            />
+          }
+          label={color.charAt(0).toUpperCase() + color.slice(1)}
+        />
+      ))}
+    </FormGroup>
+  </FormControl>
+</Grid>
         <Grid item xs={12} sm={9} md={9}>
           <Grid container spacing={2}>
             {productosFiltrados.map((producto) => (
