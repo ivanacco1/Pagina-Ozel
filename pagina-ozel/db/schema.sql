@@ -200,3 +200,19 @@ WHERE NOT EXISTS (
 UPDATE `Ozel`.`Usuarios`
 SET `DateRegistered` = CURDATE()
 WHERE `DateRegistered` IS NULL;
+
+CREATE TABLE Categorias (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    categoria VARCHAR(255) NOT NULL,
+    subcategoria VARCHAR(255) NOT NULL
+);
+
+CREATE TABLE Colores (
+    idColor INT AUTO_INCREMENT PRIMARY KEY,
+    color VARCHAR(255) NOT NULL
+);
+
+CREATE TABLE Tallas (
+    idTalla INT AUTO_INCREMENT PRIMARY KEY,
+    talla VARCHAR(255) NOT NULL
+);
