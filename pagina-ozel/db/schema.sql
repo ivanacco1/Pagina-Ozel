@@ -201,6 +201,12 @@ UPDATE `Ozel`.`Usuarios`
 SET `DateRegistered` = CURDATE()
 WHERE `DateRegistered` IS NULL;
 
+
+
+-- Reestructuracion para Filtros Dinamicos
+-------------------------------------------------------------------------------
+
+
 CREATE TABLE Categorias (
     id INT AUTO_INCREMENT PRIMARY KEY,
     categoria VARCHAR(255) NOT NULL,

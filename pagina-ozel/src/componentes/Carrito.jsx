@@ -4,18 +4,41 @@ import { Box, Typography, Button, Table, TableBody, TableCell, TableContainer, T
 import axios from 'axios';
 import { useAuth } from './AutentificacionProvider';
 import { Add, Remove, Delete } from '@mui/icons-material';
+import { initMercadoPago, Wallet } from '@mercadopago/sdk-react'
+
+
 
 const Carrito = () => {
   const { usuario } = useAuth();
   const [carrito, setCarrito] = useState([]);
   const [totalCost, setTotalCost] = useState(0);
   const [itemsToUpdate, setItemsToUpdate] = useState([]);
+  const [preferenceId, setPreferenceId] = useState(null);
+
+  initMercadoPago('APP_USR-d5acf825-4ea7-4a19-a692-9305e2907c99', {
+    locale: "es-AR"
+  });
 
   useEffect(() => {
     if (usuario) {
       cargarCarrito();
     }
   }, [usuario]);
+
+  const createPreference = async () => {
+    try {
+        const response = await axios.post("http://localhost:4500/create_preference", {
+            title: "producto prueba",
+            quantity: 1,
+            price: 100,
+        });
+
+        const {id} = response.data;
+        return id;
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   const cargarCarrito = async () => {
     try {
@@ -28,6 +51,13 @@ const Carrito = () => {
       }
     } catch (error) {
       console.error('Error al cargar el carrito:', error.message);
+    }
+  };
+
+  const handleBuy = async () => {
+    const id = await createPreference();
+    if (id){
+      setPreferenceId(id);
     }
   };
 
@@ -47,6 +77,7 @@ const Carrito = () => {
       ));
       cargarCarrito(); // Recarga el carrito después de la actualización
       setItemsToUpdate([]); // Limpia la lista de elementos a actualizar
+      handleBuy();
       alert('Cantidades actualizadas, Lógica de Compra a implementar');
     } catch (error) {
       console.error('Error al actualizar la cantidad del producto:', error.message);
@@ -122,6 +153,8 @@ const Carrito = () => {
                 <TableCell align="right"><Typography variant="h6">${totalCost}</Typography></TableCell>
                 <TableCell align="right">
                   <Button variant="contained" color="primary" onClick={handleUpdateClick}>Comprar</Button>
+                  {preferenceId && <Wallet initialization={{ preferenceId: preferenceId }} customization={{ texts:{ valueProp: 'smart_option'}}} /> }
+                  
                 </TableCell>
               </TableRow>
             </TableBody>
