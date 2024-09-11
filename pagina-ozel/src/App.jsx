@@ -1,5 +1,5 @@
 // App.jsx
-
+// Pagina de ozel, version 0.9
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AutentificacionProvider } from './componentes/AutentificacionProvider';

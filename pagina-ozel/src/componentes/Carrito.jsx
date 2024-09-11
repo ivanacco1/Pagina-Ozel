@@ -27,14 +27,19 @@ const Carrito = () => {
 
   const createPreference = async () => {
     try {
-        const response = await axios.post("http://localhost:4500/create_preference", {
-            title: "producto prueba",
-            quantity: 1,
-            price: 100,
-        });
-
-        const {id} = response.data;
-        return id;
+      // Crear un arreglo de productos con los items del carrito
+      const items = carrito.map((item) => ({
+        title: item.ProductName,  // Nombre del producto
+        quantity: item.Quantity,  // Cantidad seleccionada
+        price: item.Price,        // Precio del producto
+      }));
+  
+      // Enviar los productos al backend
+      const response = await axios.post("http://localhost:4500/create_preference", { items });
+  
+      // Obtener el ID de la preferencia de pago
+      const { id } = response.data;
+      return id;
     } catch (error) {
       console.log(error);
     }
@@ -56,7 +61,7 @@ const Carrito = () => {
 
   const handleBuy = async () => {
     const id = await createPreference();
-    if (id){
+    if (id) {
       setPreferenceId(id);
     }
   };
@@ -83,7 +88,7 @@ const Carrito = () => {
       console.error('Error al actualizar la cantidad del producto:', error.message);
     }
   };
-
+ 
   const handleRemoveFromCart = async (productId) => {
     try {
       await axios.delete(`http://localhost:5000/api/carrito/${usuario.UserId}/${productId}`);
@@ -153,8 +158,12 @@ const Carrito = () => {
                 <TableCell align="right"><Typography variant="h6">${totalCost}</Typography></TableCell>
                 <TableCell align="right">
                   <Button variant="contained" color="primary" onClick={handleUpdateClick}>Comprar</Button>
-                  {preferenceId && <Wallet initialization={{ preferenceId: preferenceId }} customization={{ texts:{ valueProp: 'smart_option'}}} /> }
-                  
+                  {preferenceId && (
+  <Wallet
+    initialization={{ preferenceId: preferenceId }}
+    customization={{ texts: { valueProp: 'smart_option' } }}
+  />
+)}
                 </TableCell>
               </TableRow>
             </TableBody>

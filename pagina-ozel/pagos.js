@@ -37,39 +37,34 @@ db.connect(err => {
 //-------------------------------------------------------------------------------------------------------------------
 
 
-app.post("/create_preference", async (req,res) =>{
-try{
-  const body = {
-    items: [
-      {
-        title: req.body.title,
-        quantity: Number(req.body.quantity),
-        unit_price: Number(req.body.price),
-        currency_id: "ARS",
+app.post("/create_preference", async (req, res) => {
+  try {
+    // Crear una lista de items que corresponde a los productos del carrito
+    const items = req.body.items.map((item) => ({
+      title: item.title,
+      quantity: Number(item.quantity),
+      unit_price: Number(item.price),
+      currency_id: "ARS",
+    }));
+
+    const preferenceData = {
+      items: items,  // Lista de productos del carrito
+      back_urls: {
+        success: "https://www.google.com/search?q=exito",
+        failure: "https://www.google.com/search?q=fallo",
+        pending: "https://www.google.com/search?q=pendiente",
       },
-    ],
-    back_urls: { //no se pueden usar localhost para estas urls
-      success: "https://www.google.com/search?q=exito",
-      failure: "https://www.google.com/search?q=fallo",
-      pending: "https://www.google.com/search?q=pendiente", 
-    },
-    auto_return: "approved", //redireccion en 5 segs
-  };
+      auto_return: "approved",
+    };
 
+    const preference = new Preference(client);
+    const result = await preference.create({ body: preferenceData });
 
-
-
-  const preference = new Preference(client);
-  const result = await preference.create({ body });
-  res.json({
-    id: result.id,
-  });
-}catch (error){
-  console.log(error);
-  res.status(500).json({
-    error: "Error al crear la preferencia."
-  });
-}
+    res.json({ id: result.id });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: "Error al crear la preferencia." });
+  }
 });
 
 //-------------------------------------------------------------------------------------------------------------------
