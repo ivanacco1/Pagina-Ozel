@@ -4,6 +4,7 @@ import axios from 'axios';
 import { useAuth } from './AutentificacionProvider';
 import { Add, Remove, Delete } from '@mui/icons-material';
 import { initMercadoPago, Wallet } from '@mercadopago/sdk-react';
+import guardarPedido from './Carrito/GuardarPedido'; // Importar la función guardarPedido
 
 const Carrito = () => {
   const { usuario } = useAuth();
@@ -62,22 +63,34 @@ const Carrito = () => {
     }
   };
 
-  // Callback cuando se hace clic en el botón de Wallet
-  const onSubmit = async (formData) => {
-    try {
-      const items = carrito.map((item) => ({
-        title: item.ProductName,
-        quantity: item.Quantity,
-        price: item.Price,
-      }));
-      const response = await axios.post("http://localhost:4500/create_preference", { items });
-      return new Promise((resolve) => {
-        resolve(response.data.id); // Resuelve con el ID de la preferencia
-      });
-    } catch (error) {
-      console.error('Error al crear la preferencia:', error);
-    }
-  };
+// Callback cuando se hace clic en el botón de Wallet
+const onSubmit = async (formData) => {
+  try {
+    const items = carrito.map((item) => ({
+      title: item.ProductName,
+      quantity: item.Quantity,
+      price: item.Price,
+    }));
+
+    const items2 = carrito.map((item) => ({
+      ProductID: item.ProductID,
+      Quantity: item.Quantity,
+      Price: item.Price,
+    }));
+
+    // Guardar el pedido en la base de datos y enviar items2 como Productos
+    await guardarPedido(usuario.UserId, totalCost, items2); 
+
+    const response = await axios.post("http://localhost:4500/create_preference", { items });
+    return new Promise((resolve) => {
+      resolve(response.data.id); // Resuelve con el ID de la preferencia
+    });
+  } catch (error) {
+    console.error('Error al crear la preferencia:', error);
+  }
+};
+
+
 
   const onError = (error) => {
     console.error('Error en el Wallet Brick:', error);

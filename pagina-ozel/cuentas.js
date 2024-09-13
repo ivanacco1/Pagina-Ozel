@@ -384,6 +384,56 @@ app.get('/api/usuarios/:id/pedidos', (req, res) => {
   });
 });
 
+// Endpoint para guardar un nuevo pedido
+app.post('/api/pedidos', (req, res) => {
+  let { OrderDate, TotalAmount, Status, Usuarios_AccountID, Productos } = req.body;
+
+  // Convertir la fecha a formato compatible con MySQL
+  const mysqlFormattedDate = new Date(OrderDate).toISOString().slice(0, 19).replace('T', ' ');
+
+  // Consulta para insertar el pedido en la tabla Pedidos
+  const queryInsertPedido = `
+      INSERT INTO Pedidos (OrderDate, TotalAmount, Status, Usuarios_AccountID) 
+      VALUES (?, ?, ?, ?)
+  `;
+
+  // Ejecutar la consulta para insertar el pedido
+  db.query(queryInsertPedido, [mysqlFormattedDate, TotalAmount, Status, Usuarios_AccountID], (err, result) => {
+      if (err) {
+          console.error('Error al guardar el pedido:', err);
+          return res.status(500).json({ message: 'Error al guardar el pedido' });
+      }
+
+      const orderId = result.insertId; // Obtener el OrderID recién generado
+
+      // Si hay productos en el pedido
+      if (Productos && Productos.length > 0) {
+          // Crear la consulta para insertar los productos con precio
+          const queryInsertProductos = `
+              INSERT INTO PedidosProductos (OrderID, Productos_ProductID, Quantity, Price) 
+              VALUES ?
+          `;
+
+          // Crear un array de valores para la consulta
+          const productosValues = Productos.map(p => [orderId, p.ProductID, p.Quantity, p.Price]);
+
+          // Ejecutar la consulta para insertar los productos
+          db.query(queryInsertProductos, [productosValues], (err) => {
+              if (err) {
+                  console.error('Error al guardar los productos del pedido:', err);
+                  return res.status(500).json({ message: 'Error al guardar los productos del pedido' });
+              }
+
+              res.status(200).json({ message: 'Pedido y productos guardados con éxito', OrderID: orderId });
+          });
+      } else {
+          // Si no hay productos, solo responder con el éxito del pedido
+          res.status(200).json({ message: 'Pedido guardado con éxito', OrderID: orderId });
+      }
+  });
+});
+
+
 
 // Endpoint para eliminar usuario
 app.delete('/api/usuarios/:id', async (req, res) => {

@@ -222,3 +222,15 @@ CREATE TABLE Tallas (
     idTalla INT AUTO_INCREMENT PRIMARY KEY,
     talla VARCHAR(255) NOT NULL
 );
+
+CREATE TABLE PedidosProductos (
+    OrderID INT NOT NULL,
+    Productos_ProductID INT NOT NULL,
+    Quantity INT NOT NULL,
+    PRIMARY KEY (OrderID, Productos_ProductID),
+    FOREIGN KEY (OrderID) REFERENCES Pedidos(OrderID),
+    FOREIGN KEY (Productos_ProductID) REFERENCES Productos(ProductID)
+);
+
+ALTER TABLE PedidosProductos
+ADD COLUMN Price DECIMAL(10, 2) NOT NULL;
