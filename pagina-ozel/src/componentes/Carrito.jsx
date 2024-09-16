@@ -42,7 +42,9 @@ const Carrito = () => {
     setTotalCost(total);
   };
 
-  const handleQuantityChange = (productId, newQuantity) => {
+  const handleQuantityChange = async (productId, newQuantity) => {
+    if (newQuantity <= 0) return; // Prevent negative or zero quantities
+  
     const updatedCart = carrito.map(item => {
       if (item.ProductID === productId) {
         return { ...item, Quantity: newQuantity };
@@ -52,7 +54,20 @@ const Carrito = () => {
   
     setCarrito(updatedCart);
     calcularCostoTotal(updatedCart);
+  
+    try {
+      // Update the quantity in the database
+      await axios.put('http://localhost:5000/api/carrito', {
+        Usuarios_AccountID: usuario.UserId,
+        Productos_ProductID: productId,
+        Quantity: newQuantity,
+      });
+    } catch (error) {
+      console.error('Error al actualizar la cantidad del producto:', error.message);
+    }
   };
+
+
 
   const handleRemoveFromCart = async (productId) => {
     try {
@@ -79,7 +94,7 @@ const onSubmit = async (formData) => {
     }));
 
     // Guardar el pedido en la base de datos y enviar items2 como Productos
-    await guardarPedido(usuario.UserId, totalCost, items2); 
+    await guardarPedido(usuario, totalCost, items2); 
 
     const response = await axios.post("http://localhost:4500/create_preference", { items });
     return new Promise((resolve) => {
@@ -97,7 +112,7 @@ const onSubmit = async (formData) => {
   };
 
   const onReady = () => {
-    console.log('Wallet Brick está listo');
+    //console.log('Wallet Brick está listo');
   };
 
   // Función para simular el clic en el botón de Wallet

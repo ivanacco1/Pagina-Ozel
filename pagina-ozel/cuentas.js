@@ -386,19 +386,19 @@ app.get('/api/usuarios/:id/pedidos', (req, res) => {
 
 // Endpoint para guardar un nuevo pedido
 app.post('/api/pedidos', (req, res) => {
-  let { OrderDate, TotalAmount, Status, Usuarios_AccountID, Productos } = req.body;
+  let { OrderDate, TotalAmount, Status, Usuarios_AccountID, Productos, Address, City, PostalCode, Provincia } = req.body;
 
   // Convertir la fecha a formato compatible con MySQL
   const mysqlFormattedDate = new Date(OrderDate).toISOString().slice(0, 19).replace('T', ' ');
 
-  // Consulta para insertar el pedido en la tabla Pedidos
+  // Consulta para insertar el pedido en la tabla Pedidos, ahora incluyendo Address, City, PostalCode y Provincia
   const queryInsertPedido = `
-      INSERT INTO Pedidos (OrderDate, TotalAmount, Status, Usuarios_AccountID) 
-      VALUES (?, ?, ?, ?)
+      INSERT INTO Pedidos (OrderDate, TotalAmount, Status, Usuarios_AccountID, Address, City, PostalCode, Provincia) 
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
   `;
 
-  // Ejecutar la consulta para insertar el pedido
-  db.query(queryInsertPedido, [mysqlFormattedDate, TotalAmount, Status, Usuarios_AccountID], (err, result) => {
+  // Ejecutar la consulta para insertar el pedido con los datos de dirección
+  db.query(queryInsertPedido, [mysqlFormattedDate, TotalAmount, Status, Usuarios_AccountID, Address, City, PostalCode, Provincia], (err, result) => {
       if (err) {
           console.error('Error al guardar el pedido:', err);
           return res.status(500).json({ message: 'Error al guardar el pedido' });
@@ -432,7 +432,6 @@ app.post('/api/pedidos', (req, res) => {
       }
   });
 });
-
 
 
 // Endpoint para eliminar usuario
