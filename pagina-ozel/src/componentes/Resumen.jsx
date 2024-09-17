@@ -21,6 +21,7 @@ const Resumen = () => {
     Phone: '',
     Address: '',
     City: '',
+    Provincia: '',
     PostalCode: '',
     CurrentPassword: '',
     NewPassword: '',
@@ -40,6 +41,7 @@ const Resumen = () => {
         Phone: usuario.Phone,
         Address: usuario.Address,
         City: usuario.City,
+        Provincia: usuario.Provincia,
         PostalCode: usuario.PostalCode,
         CurrentPassword: '',
         NewPassword: '',
@@ -130,6 +132,7 @@ const Resumen = () => {
         setEditMode(false);
         setChangePasswordMode(false);
         actualizarUsuario(updatedUser.user); // Actualiza el contexto con los nuevos datos del usuario
+        console.log(updatedUser.user);
       } else {
         console.error('Error al actualizar los datos:', response.statusText);
         alert('Error al actualizar los datos.');
@@ -174,7 +177,8 @@ const Resumen = () => {
             InputLabelProps={{ shrink: true }}
           />
         </Grid>
-        <Grid item xs={12}>
+ {/* Teléfono y Email en la misma fila */}
+ <Grid item xs={12} md={6}>
           <TextField
             className="MuiTextField-root"
             label="Correo Electrónico"
@@ -201,12 +205,13 @@ const Resumen = () => {
             inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }}
           />
         </Grid>
+        {/* Ciudad y Provincia en la misma fila */}
         <Grid item xs={12} md={6}>
           <TextField
             className="MuiTextField-root"
-            label="Dirección"
-            name="Address"
-            value={formData.Address || ''}
+            label="Ciudad"
+            name="City"
+            value={formData.City || ''}
             onChange={handleInputChange}
             disabled={!editMode}
             fullWidth
@@ -217,9 +222,23 @@ const Resumen = () => {
         <Grid item xs={12} md={6}>
           <TextField
             className="MuiTextField-root"
-            label="Ciudad"
-            name="City"
-            value={formData.City || ''}
+            label="Provincia"
+            name="Provincia"
+            value={formData.Provincia || ''}
+            onChange={handleInputChange}
+            disabled={!editMode}
+            fullWidth
+            margin="normal"
+            InputLabelProps={{ shrink: true }}
+          />
+        </Grid>
+        {/* Dirección y Código Postal en la misma fila */}
+        <Grid item xs={12} md={6}>
+          <TextField
+            className="MuiTextField-root"
+            label="Dirección"
+            name="Address"
+            value={formData.Address || ''}
             onChange={handleInputChange}
             disabled={!editMode}
             fullWidth

@@ -39,6 +39,7 @@ const createUserData = (user) => {
     Phone: user.Phone,
     Address: user.Address,
     City: user.City,
+    Provincia: user.Provincia,
     PostalCode: user.PostalCode
   };
 };
@@ -54,6 +55,7 @@ const createUserDataComplete = (user) => {
     Phone: user.Phone,
     Address: user.Address,
     City: user.City,
+    Provincia: user.Provincia,
     PostalCode: user.PostalCode,
     DateRegistered: user.DateRegistered
   };
@@ -167,7 +169,7 @@ app.post('/api/usuarios/login', (req, res) => {
 //endpoint para modificar usuario
 app.put('/api/usuarios/:id', (req, res) => {
   const userId = req.params.id;
-  const { FirstName, LastName, Email, CurrentPassword, NewPassword, Phone, Address, City, PostalCode, Role , TargetID, AdminPassword} = req.body;
+  const { FirstName, LastName, Email, CurrentPassword, NewPassword, Phone, Address, City, Provincia, PostalCode, Role , TargetID, AdminPassword} = req.body;
 
   //console.log(req.body);
 
@@ -183,7 +185,7 @@ app.put('/api/usuarios/:id', (req, res) => {
   const updateUser = async (hashedPassword) => {
     // Crear la consulta SQL para actualizar el usuario
     let query = `UPDATE Usuarios SET FirstName = ?, LastName = ?, Email = ?, 
-                  ${hashedPassword ? 'Password = ?, ' : ''} Phone = ?, Address = ?, City = ?, PostalCode = ? 
+                  ${hashedPassword ? 'Password = ?, ' : ''} Phone = ?, Address = ?, City = ?, Provincia = ?, PostalCode = ? 
                   ${Role ? ', Role = ?' : ''} 
                   WHERE AccountID = ?`;
 
@@ -191,7 +193,7 @@ app.put('/api/usuarios/:id', (req, res) => {
     if (hashedPassword) {
       values.push(hashedPassword);
     }
-    values.push(Phone, Address, City, PostalCode);
+    values.push(Phone, Address, City, Provincia, PostalCode);
     if (Role) {
       values.push(Role);
     }
@@ -213,8 +215,9 @@ app.put('/api/usuarios/:id', (req, res) => {
 
                // Enviar los datos del usuario al frontend
                const userData = createUserData(updatedUser[0])
-
+            //console.log(userData);
         res.status(200).json( {message: 'Usuario actualizado exitosamente!', user: userData });
+        //console.log(userData);
       });
     });
   };
