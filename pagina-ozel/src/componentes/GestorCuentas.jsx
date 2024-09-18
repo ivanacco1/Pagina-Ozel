@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { CircularProgress, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography, TextField, FormControl, InputLabel, Select, MenuItem, Button, Dialog, DialogTitle, DialogContent, DialogActions, IconButton } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
+import VisibilityIcon from '@mui/icons-material/Visibility';
 import axios from 'axios';
 import { useAuth } from './AutentificacionProvider';
+import HistorialCompras from './GestorCuentas/HistorialCompras'; // Importamos el nuevo componente
 import '../estilos/GestorCuentas.css';
 
 const GestorCuentas = () => {
@@ -18,6 +20,8 @@ const GestorCuentas = () => {
   const [openResetDialog, setOpenResetDialog] = useState(false);
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [resetPassword, setResetPassword] = useState('');
+  const [openHistorialDialog, setOpenHistorialDialog] = useState(false); // Estado para abrir/cerrar el historial de compras
+  
 
   useEffect(() => {
     cargarUsuarios();
@@ -174,6 +178,16 @@ const GestorCuentas = () => {
     isValueIncluded(user.Phone, searchTerm)
   );
 
+  const handleHistorialClick = (user) => {
+    setSelectedUser(user); // Guardamos el usuario seleccionado
+    setOpenHistorialDialog(true); // Abrimos el modal del historial de compras
+  };
+
+  const handleCloseHistorial = () => {
+    setOpenHistorialDialog(false); // Cerramos el modal
+  };
+
+
   return (
     <>
       <Typography variant="h5" gutterBottom mt={4}>Gestor de Cuentas</Typography>
@@ -202,6 +216,7 @@ const GestorCuentas = () => {
                   <TableCell>Fecha de<br/>registro</TableCell>
                   <TableCell>Restablecer<br/>Contraseña</TableCell>
                   <TableCell>Borrar<br/>Cuenta</TableCell>
+                  <TableCell>Ver<br/>Pedidos</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -251,6 +266,14 @@ const GestorCuentas = () => {
                         <DeleteIcon />
                       </IconButton>
                     </TableCell>
+                    <TableCell>
+              <IconButton
+                color="primary"
+                onClick={() => handleHistorialClick(user)}
+              >
+                <VisibilityIcon />
+              </IconButton>
+            </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -317,6 +340,22 @@ const GestorCuentas = () => {
               <Button onClick={handleConfirmDeleteUser} color="primary" variant="contained">Confirmar</Button>
             </DialogActions>
           </Dialog>
+
+
+          
+          <Dialog open={openHistorialDialog} onClose={handleCloseHistorial} fullWidth maxWidth="md">
+        <DialogTitle>Historial de Compras de {selectedUser?.FirstName} {selectedUser?.LastName}</DialogTitle>
+        <DialogContent>
+          {selectedUser && (
+            <HistorialCompras userId={selectedUser.AccountID} /> // Renderizamos el componente con el historial de compras
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseHistorial} color="primary">
+            Cerrar
+          </Button>
+        </DialogActions>
+      </Dialog>
         </>
       )}
     </>
