@@ -21,7 +21,8 @@ const GestorCuentas = () => {
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [resetPassword, setResetPassword] = useState('');
   const [openHistorialDialog, setOpenHistorialDialog] = useState(false); // Estado para abrir/cerrar el historial de compras
-  
+  const [passwordConfirmation, setPasswordConfirmation] = useState('');
+const [openPasswordDialog, setOpenPasswordDialog] = useState(false);
 
   useEffect(() => {
     cargarUsuarios();
@@ -178,14 +179,35 @@ const GestorCuentas = () => {
     isValueIncluded(user.Phone, searchTerm)
   );
 
-  const handleHistorialClick = (user) => {
-    setSelectedUser(user); // Guardamos el usuario seleccionado
-    setOpenHistorialDialog(true); // Abrimos el modal del historial de compras
-  };
+const handleHistorialClick = (user) => {
+  setSelectedUser(user); // Guardamos el usuario seleccionado
+  setOpenPasswordDialog(true); // Abrimos el modal de confirmación de contraseña
+};
 
   const handleCloseHistorial = () => {
     setOpenHistorialDialog(false); // Cerramos el modal
   };
+
+  const handleConfirmPassword = async () => {
+    try {
+      const response = await axios.post('http://localhost:5000/api/usuarios/validate-password', {
+        UserId: usuario.UserId, // ID del usuario actual
+        Password: passwordConfirmation
+      });
+      setPasswordConfirmation('');
+      if (response.status === 200) {
+        setOpenPasswordDialog(false); // Cerrar el modal de contraseña
+        setOpenHistorialDialog(true); // Abrir el modal del historial
+      } else {
+        alert('Contraseña incorrecta');
+      }
+    } catch (error) {
+      console.error('Error al validar la contraseña:', error.response?.data?.message || error.message);
+      alert('Error al validar la contraseña');
+    }
+  };
+
+  
 
 
   return (
@@ -356,6 +378,27 @@ const GestorCuentas = () => {
           </Button>
         </DialogActions>
       </Dialog>
+      <Dialog open={openPasswordDialog} onClose={() => setOpenPasswordDialog(false)}>
+  <DialogTitle>Confirmar Contraseña</DialogTitle>
+  <DialogContent>
+    <Typography variant="body1">
+      Introduzca su contraseña para ver el historial de compras del usuario {selectedUser ? selectedUser.FirstName : ''}:
+    </Typography>
+    <TextField
+      label="Contraseña"
+      type="password"
+      variant="outlined"
+      fullWidth
+      margin="normal"
+      value={passwordConfirmation}
+      onChange={(e) => setPasswordConfirmation(e.target.value)}
+    />
+  </DialogContent>
+  <DialogActions>
+    <Button onClick={() => setOpenPasswordDialog(false)} color="primary">Cancelar</Button>
+    <Button onClick={handleConfirmPassword} color="primary" variant="contained">Confirmar</Button>
+  </DialogActions>
+</Dialog>
         </>
       )}
     </>

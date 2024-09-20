@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { CircularProgress, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography } from '@mui/material';
+import React, { useState, useEffect } from 'react'; 
+import { CircularProgress, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography, Select, MenuItem } from '@mui/material';
 import axios from 'axios';
 
 const HistorialCompras = ({ userId }) => {
@@ -32,6 +32,28 @@ const HistorialCompras = ({ userId }) => {
     return new Intl.DateTimeFormat('es-ES').format(date); // Formato dd/mm/yyyy
   };
 
+  // Función para manejar el cambio de estado
+  const handleStatusChange = async (orderId, newStatus) => {
+    try {
+      const response = await axios.put(`http://localhost:5000/api/pedidos/${orderId}/status`, {
+        status: newStatus
+      });
+
+      if (response.status === 200) {
+        // Actualizar el historial en la UI
+        setHistorial((prevHistorial) => 
+          prevHistorial.map((pedido) =>
+            pedido.OrderID === orderId ? { ...pedido, Status: newStatus } : pedido
+          )
+        );
+      } else {
+        console.error('Error al actualizar el estado del pedido:', response.statusText);
+      }
+    } catch (error) {
+      console.error('Error al actualizar el estado del pedido:', error.response?.data?.message || error.message);
+    }
+  };
+
   return (
     <>
       {loading ? (
@@ -53,7 +75,18 @@ const HistorialCompras = ({ userId }) => {
                   <TableCell>{pedido.OrderID}</TableCell>
                   <TableCell>{formatearFecha(pedido.OrderDate)}</TableCell>
                   <TableCell>{pedido.TotalAmount}</TableCell>
-                  <TableCell>{pedido.Status}</TableCell>
+                  <TableCell>
+                    <Select
+                      value={pedido.Status}
+                      onChange={(e) => handleStatusChange(pedido.OrderID, e.target.value)}
+                      sx={{ width: 150 }}
+                    >
+                      <MenuItem value="Pendiente">Pendiente</MenuItem>
+                      <MenuItem value="Cancelado">Cancelado</MenuItem>
+                      <MenuItem value="Procesando">Procesando</MenuItem>
+                      <MenuItem value="Completado">Completado</MenuItem>
+                    </Select>
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>

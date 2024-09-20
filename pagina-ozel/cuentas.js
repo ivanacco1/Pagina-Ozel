@@ -439,6 +439,42 @@ app.post('/api/pedidos', (req, res) => {
 });
 
 
+app.post('/api/usuarios/validate-password', (req, res) => {
+  const { UserId, Password } = req.body;
+
+  // Consulta para obtener la contraseña hash del usuario
+  const query = 'SELECT Password FROM usuarios WHERE AccountID = ?';
+//console.log(req.body);
+  // Ejecutar la consulta
+  db.query(query, [UserId], (err, results) => {
+    if (err) {
+      return res.status(501).json({ error: 'Error al validar la contraseña' });
+    }
+
+    // Si no se encuentra al usuario
+    if (results.length === 0) {
+      return res.status(404).json({ error: 'Usuario no encontrado' });
+    }
+
+    const hashedPassword = results[0].Password;
+
+    // Comparar la contraseña proporcionada con la almacenada (hash)
+    bcrypt.compare(Password, hashedPassword, (err, isMatch) => {
+      if (err) {
+        return res.status(500).json({ error: 'Error al comparar la contraseña' });
+      }
+
+      // Si la contraseña coincide
+      if (isMatch) {
+        res.status(200).json({ message: 'Contraseña válida' });
+      } else {
+        // Si la contraseña es incorrecta
+        res.status(401).json({ error: 'Contraseña incorrecta' });
+      }
+    });
+  });
+});
+
 // Obtener los detalles de un pedido específico
 app.get('/api/pedidos/:orderId', (req, res) => {
   const orderId = req.params.orderId;
@@ -470,6 +506,26 @@ app.get('/api/pedidos/:orderId', (req, res) => {
 
       res.status(200).json(detallesPedido);
     });
+  });
+});
+
+// Actualizar el estado de un pedido
+app.put('/api/pedidos/:orderId/status', (req, res) => {
+  const orderId = req.params.orderId;
+  const { status } = req.body;
+
+  const query = 'UPDATE Pedidos SET Status = ? WHERE OrderID = ?';
+
+  db.query(query, [status, orderId], (err, result) => {
+    if (err) {
+      return res.status(500).json({ error: 'Error al actualizar el estado del pedido' });
+    }
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'Pedido no encontrado' });
+    }
+
+    res.status(200).json({ message: 'Estado del pedido actualizado correctamente' });
   });
 });
 
