@@ -181,6 +181,7 @@ const [openPasswordDialog, setOpenPasswordDialog] = useState(false);
 
 const handleHistorialClick = (user) => {
   setSelectedUser(user); // Guardamos el usuario seleccionado
+  console.log(user);
   setOpenPasswordDialog(true); // Abrimos el modal de confirmación de contraseña
 };
 
@@ -369,7 +370,20 @@ const handleHistorialClick = (user) => {
         <DialogTitle>Historial de Compras de {selectedUser?.FirstName} {selectedUser?.LastName}</DialogTitle>
         <DialogContent>
           {selectedUser && (
-            <HistorialCompras userId={selectedUser.AccountID} /> // Renderizamos el componente con el historial de compras
+            
+ <>
+<div style={{ marginBottom: '16px' }}>
+          <Typography variant="body1"><strong>Email:</strong> {selectedUser.Email}</Typography>
+          <Typography variant="body1"><strong>Teléfono:</strong> {selectedUser.Phone}</Typography>
+          <Typography variant="body1"><strong>Dirección:</strong> {selectedUser.Address}</Typography>
+          <Typography variant="body1"><strong>Ciudad:</strong> {selectedUser.City}</Typography>
+          <Typography variant="body1"><strong>Provincia:</strong> {selectedUser.Provincia}</Typography>
+         <Typography variant="body1"><strong>Código Postal:</strong> {selectedUser.PostalCode}</Typography>
+        </div>
+
+            <HistorialCompras userId={selectedUser.AccountID} /> 
+
+            </>
           )}
         </DialogContent>
         <DialogActions>

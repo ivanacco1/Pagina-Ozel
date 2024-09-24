@@ -337,7 +337,7 @@ app.put('/api/usuarios/:id', (req, res) => {
 
 // Ruta para obtener la lista de usuarios
 app.get('/api/usuarios/lista', (req, res) => {
-  const query = 'SELECT AccountID, FirstName, LastName, Email, Role, Phone, Address, City, PostalCode, DateRegistered FROM Usuarios';
+  const query = 'SELECT AccountID, FirstName, LastName, Email, Role, Phone, Address, City, PostalCode, DateRegistered, Provincia FROM Usuarios';
 
   db.query(query, (err, results) => {
     if (err) {
@@ -361,6 +361,25 @@ app.get('/api/usuarios/lista', (req, res) => {
     res.status(200).json(usuarios);
   });
 });
+
+
+app.get('/api/pedidos-completo', async (req, res) => {
+  
+  const query = `SELECT pedidos.OrderID, pedidos.OrderDate, pedidos.TotalAmount, pedidos.Status, 
+       usuarios.FirstName, usuarios.LastName, usuarios.Email
+      FROM pedidos
+      JOIN usuarios ON pedidos.Usuarios_AccountID = usuarios.AccountID`;
+  
+  db.query(query, (err, results) => {
+    if (err) {
+      console.error('Error al obtener pedidos:', err);
+      res.status(500).json({ message: 'Error al obtener los pedidos.' });
+    }
+    
+    res.json(results);
+  });
+});
+
 
 
 app.get('/api/usuarios/:id/pedidos', (req, res) => {
@@ -388,6 +407,9 @@ app.get('/api/usuarios/:id/pedidos', (req, res) => {
     res.status(200).json(formattedResults || []); // Enviar un array vacío si no hay pedidos
   });
 });
+
+
+
 
 // Endpoint para guardar un nuevo pedido
 app.post('/api/pedidos', (req, res) => {

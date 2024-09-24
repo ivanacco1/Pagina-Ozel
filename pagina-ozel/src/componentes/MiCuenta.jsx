@@ -7,7 +7,7 @@ import HistorialCompras from './HistorialCompras';
 import GestorCuentas from './GestorCuentas';
 import GestorProductos from './GestorProductos';
 import GestorCategorias from './GestorCategorias';
-
+import GestorPedidos from './GestorPedidos';
 import CategoriaModal from './CategoriaModal';
 
 const MiCuenta = () => {
@@ -46,6 +46,7 @@ const MiCuenta = () => {
             {(usuario.Role === 'admin' || usuario.Role === 'gestor') && <Tab label="Gestor de Productos" />}
             {usuario.Role === 'admin' && <Tab label="Gestor de Cuentas" />}
             {(usuario.Role === 'admin' || usuario.Role === 'gestor') && <Tab label="Gestor de Categorías" />}
+            {(usuario.Role === 'admin' || usuario.Role === 'gestor') && <Tab label="Pedidos" />}
           </Tabs>
         </AppBar>
         <Box p={3} className="mi-cuenta-content">
@@ -54,6 +55,7 @@ const MiCuenta = () => {
           {selectedTab === 2 && <GestorProductos />}
           {selectedTab === 3 && <GestorCuentas />}
           {selectedTab === 4 && <GestorCategorias />}
+          {selectedTab === 5 && <GestorPedidos />} 
         </Box>
       </Box>
     </Container>
