@@ -5,7 +5,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import axios from 'axios';
 import { useAuth } from './AutentificacionProvider';
-import HistorialCompras from './GestorCuentas/HistorialCompras'; // Importamos el nuevo componente
+import HistorialCompras from './GestorCuentas/HistorialCompras';
 import '../estilos/GestorCuentas.css';
 
 const GestorCuentas = () => {

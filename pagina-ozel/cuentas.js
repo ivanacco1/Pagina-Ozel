@@ -751,6 +751,9 @@ app.put('/api/carrito', (req, res) => {
   }
 });
 
+
+
+
 // Endpoint para eliminar un producto del carrito
 app.delete('/api/carrito/:accountId/:productId', (req, res) => {
   const { accountId, productId } = req.params;
@@ -770,6 +773,24 @@ app.delete('/api/carrito/:accountId/:productId', (req, res) => {
   });
 });
 
+
+// Endpoint para limpiar un carrito
+app.delete('/carritovaciar/:userId', async (req, res) => {
+  const { userId } = req.params;
+
+  const query = `
+    DELETE FROM Carrito WHERE Usuarios_AccountID = ?
+ `;
+
+  db.query(query, [userId], (err, results) => {
+    if (err) {
+      console.error('Error al vaciar el carrito:', err);
+      return res.status(500).json({ message: 'Error al vaciar el carrito' });
+    }
+
+    res.status(200).json({ message: 'Carrito vaciado exitosamente' });
+  });
+});
 
 
 

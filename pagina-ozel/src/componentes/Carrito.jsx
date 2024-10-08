@@ -67,8 +67,6 @@ const Carrito = () => {
     }
   };
 
-
-
   const handleRemoveFromCart = async (productId) => {
     try {
       await axios.delete(`http://localhost:5000/api/carrito/${usuario.UserId}/${productId}`);
@@ -78,34 +76,47 @@ const Carrito = () => {
     }
   };
 
-// Callback cuando se hace clic en el botón de Wallet
-const onSubmit = async (formData) => {
-  try {
-    const items = carrito.map((item) => ({
-      title: item.ProductName,
-      quantity: item.Quantity,
-      price: item.Price,
-    }));
+  // Función para limpiar el carrito después de guardar el pedido
+  const limpiarCarrito = async () => {
+    try {
+      await axios.delete(`http://localhost:5000/carritovaciar/${usuario.UserId}`);
+      //setCarrito([]); // Vaciar el carrito en el estado
+      //setTotalCost(0); // Reiniciar el costo total
+      console.log(usuario.UserId);
+    } catch (error) {
+      console.error('Error al vaciar el carrito:', error.message);
+    }
+  };
 
-    const items2 = carrito.map((item) => ({
-      ProductID: item.ProductID,
-      Quantity: item.Quantity,
-      Price: item.Price,
-    }));
+  // Callback cuando se hace clic en el botón de Wallet
+  const onSubmit = async (formData) => {
+    try {
+      const items = carrito.map((item) => ({
+        title: item.ProductName,
+        quantity: item.Quantity,
+        price: item.Price,
+      }));
 
-    // Guardar el pedido en la base de datos y enviar items2 como Productos
-    await guardarPedido(usuario, totalCost, items2); 
+      const items2 = carrito.map((item) => ({
+        ProductID: item.ProductID,
+        Quantity: item.Quantity,
+        Price: item.Price,
+      }));
 
-    const response = await axios.post("http://localhost:4500/create_preference", { items });
-    return new Promise((resolve) => {
-      resolve(response.data.id); // Resuelve con el ID de la preferencia
-    });
-  } catch (error) {
-    console.error('Error al crear la preferencia:', error);
-  }
-};
+      // Guardar el pedido en la base de datos y enviar items2 como Productos
+      await guardarPedido(usuario, totalCost, items2); 
 
+      // Limpiar el carrito después de guardar el pedido
+      await limpiarCarrito();
 
+      const response = await axios.post("http://localhost:4500/create_preference", { items });
+      return new Promise((resolve) => {
+        resolve(response.data.id); // Resuelve con el ID de la preferencia
+      });
+    } catch (error) {
+      console.error('Error al crear la preferencia:', error);
+    }
+  };
 
   const onError = (error) => {
     console.error('Error en el Wallet Brick:', error);
@@ -180,16 +191,14 @@ const onSubmit = async (formData) => {
         </TableContainer>
       )}
 
-                  {/* Botón de Mercado Pago Wallet Brick con display: none */}
-                  <div id="walletBrick_container" ref={walletButtonRef} style={{ display: 'none' }}>
-                    <Wallet
-                        onSubmit={onSubmit}
-                        onReady={onReady}
-                        onError={onError}
-                    />
-                  </div>
-
-
+      {/* Botón de Mercado Pago Wallet Brick con display: none */}
+      <div id="walletBrick_container" ref={walletButtonRef} style={{ display: 'none' }}>
+        <Wallet
+            onSubmit={onSubmit}
+            onReady={onReady}
+            onError={onError}
+        />
+      </div>
     </Box>
   );
 };
