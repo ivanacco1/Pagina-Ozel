@@ -13,6 +13,8 @@ import MiCuenta from './MiCuenta';
 import CatalogoProductos from './CatalogoProductos';
 import DetalleProducto from './DetalleProducto';
 import Carrito from './Carrito'; 
+import Contacto from './Contacto'; 
+import Ayuda from './Ayuda'; 
 
 const Navegacion = () => {
   const { usuario, estado, logout } = useAuth();
@@ -56,8 +58,8 @@ const Navegacion = () => {
           <div className="nav-right">
             <Button className="nav-button" component={Link} to="/">INICIO</Button>
             <Button className="nav-button" component={Link} to="/catalogo">PRODUCTOS</Button>
-            <Button className="nav-button">AYUDA</Button>
-            <Button className="nav-button">CONTACTO</Button>
+            <Button className="nav-button" component={Link} to="/ayuda">AYUDA</Button>
+            <Button className="nav-button" component={Link} to="/contacto">CONTACTO</Button>
             <Button className="nav-button" component={Link} to="/carrito">
               <ShoppingCartIcon />
             </Button>
@@ -71,6 +73,8 @@ const Navegacion = () => {
           <Route path="/catalogo" element={<CatalogoProductos />} />
           <Route path="/producto/:id" element={<DetalleProducto />} />
           <Route path="/carrito" element={<Carrito />} /> 
+          <Route path="/contacto" element={<Contacto />} /> 
+          <Route path="/ayuda" element={<Ayuda />} /> 
         </Routes>
       </div>
       <Register

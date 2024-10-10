@@ -10,7 +10,7 @@ const HistorialCompras = ({ userId }) => {
     const cargarHistorial = async () => {
       setLoading(true);
       try {
-        const response = await axios.get('http://localhost:5000/api/pedidos-completo');
+        const response = await axios.get(`http://localhost:5000/api/pedidos/historial/${userId}`);
         if (response.status === 200) {
           const sortedHistorial = response.data.sort((a, b) => b.OrderID - a.OrderID); // Ordenar por OrderID descendente
           setHistorial(sortedHistorial);
@@ -38,9 +38,10 @@ const HistorialCompras = ({ userId }) => {
       const response = await axios.put(`http://localhost:5000/api/pedidos/${orderId}/status`, {
         status: newStatus
       });
-  
+
       if (response.status === 200) {
-        setHistorial((prevHistorial) =>
+        // Actualizar el historial en la UI
+        setHistorial((prevHistorial) => 
           prevHistorial.map((pedido) =>
             pedido.OrderID === orderId ? { ...pedido, Status: newStatus } : pedido
           )
