@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import axios from 'axios';
 import { Grid, Typography, FormControl, FormGroup, FormControlLabel, Checkbox, Box } from '@mui/material';
 import ProductoCard from './ProductoCard'; 
@@ -6,7 +7,9 @@ import ProductForm from './ProductForm';
 import { useAuth } from './AutentificacionProvider';
 import '../estilos/Catalogo.css';
 
-const CatalogoProductos = () => {
+const CatalogoProductos = (searchResults) => {
+  const location = useLocation();
+  let searchResultss = location.state?.searchResults;
   const { usuario } = useAuth();
   const [productos, setProductos] = useState([]);
   const [categorias, setCategorias] = useState([]);
@@ -113,6 +116,12 @@ const CatalogoProductos = () => {
   const handleFiltroChange = (event) => {
     const { name, checked } = event.target;
     const [tipo, categoria, subcategoria] = name.split('.');
+
+    if (searchResultss && Array.isArray(searchResultss) && searchResultss.length > 0) {
+      // Si hay resultados en la búsqueda, usa esos resultados
+      searchResultss = null;
+      productosFiltrados = filtrarProductos();
+    } 
   
     if (tipo === 'categoria') {
       if (subcategoria) {
@@ -170,7 +179,7 @@ const CatalogoProductos = () => {
   const filtrarProductos = () => {
     return productos.filter((producto) => {
       const { Category, Subcategory, Size, Color } = producto;
-  
+        console.log(productos);
       // Verificar filtros de categoría y subcategoría (mostrar si al menos una categoría o subcategoría coincide)
       const categoriaFiltro = Object.keys(filtros.categoria).some((categoria) => {
         const categoriaData = filtros.categoria[categoria];
@@ -212,7 +221,17 @@ const CatalogoProductos = () => {
     });
   };
 
-  const productosFiltrados = filtrarProductos();
+  let productosFiltrados = filtrarProductos();
+  
+  if (searchResultss && Array.isArray(searchResultss) && searchResultss.length > 0) {
+    // Si hay resultados en la búsqueda, usa esos resultados
+    productosFiltrados = searchResultss;
+  } else {
+    // Si no hay resultados de búsqueda, usa el resultado de filtrarProductos() si es un array, o un array vacío
+    const todosProductos = filtrarProductos();
+    productosFiltrados = Array.isArray(todosProductos) ? todosProductos : [];
+  }
+
 
   const handleEditProductClick = (product) => {
     setFormMode('edit');
