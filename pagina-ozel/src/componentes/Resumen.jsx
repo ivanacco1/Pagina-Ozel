@@ -27,6 +27,7 @@ const Resumen = () => {
     NewPassword: '',
     ConfirmPassword: ''
   });
+  const [validationErrors, setValidationErrors] = useState({});
 
   const handleMostrarContraseñaClick = () => {
     setMostrarContraseña(!mostrarContraseña);
@@ -78,6 +79,11 @@ const Resumen = () => {
       ...formData,
       [name]: value,
     });
+    // limpia los errores de validación al cambiar el valor de un campo
+    setValidationErrors({
+      ...validationErrors,
+      [name]: '',
+    });
   };
 
   const handleEdit = () => {
@@ -99,9 +105,24 @@ const Resumen = () => {
       NewPassword: '',
       ConfirmPassword: ''
     });
+    setValidationErrors({});
   };
 
   const handleConfirm = async () => {
+    const requiredFields = ['FirstName', 'LastName', 'Email', 'Phone', 'Address', 'City', 'Provincia', 'PostalCode'];
+    let errors = {};
+
+    requiredFields.forEach(field => {
+      if (!formData[field]) {
+        errors[field] = 'Este campo es obligatorio';
+      }
+    });
+
+    if (Object.keys(errors).length > 0) {
+      setValidationErrors(errors);
+      return;
+    }
+
     if (!formData.CurrentPassword) {
       alert('Por favor, introduce tu contraseña actual para confirmar.');
       return;
@@ -162,6 +183,7 @@ const Resumen = () => {
             fullWidth
             margin="normal"
             InputLabelProps={{ shrink: true }}
+            helperText={validationErrors.FirstName}
           />
         </Grid>
         <Grid item xs={12} md={6}>
@@ -175,10 +197,12 @@ const Resumen = () => {
             fullWidth
             margin="normal"
             InputLabelProps={{ shrink: true }}
+            error={!!validationErrors.LastName}
+            helperText={validationErrors.LastName}
           />
         </Grid>
- {/* Teléfono y Email en la misma fila */}
- <Grid item xs={12} md={6}>
+         {/* Teléfono y Email en la misma fila */}
+        <Grid item xs={12} md={6}>
           <TextField
             className="MuiTextField-root"
             label="Correo Electrónico"
@@ -189,6 +213,8 @@ const Resumen = () => {
             fullWidth
             margin="normal"
             InputLabelProps={{ shrink: true }}
+            error={!!validationErrors.Email}
+            helperText={validationErrors.Email}
           />
         </Grid>
         <Grid item xs={12} md={6}>
@@ -203,9 +229,12 @@ const Resumen = () => {
             margin="normal"
             InputLabelProps={{ shrink: true }}
             inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }}
+            error={!!validationErrors.Phone}
+            helperText={validationErrors.Phone}
           />
         </Grid>
-        {/* Ciudad y Provincia en la misma fila */}
+
+         {/* Ciudad y Provincia en la misma fila */}
         <Grid item xs={12} md={6}>
           <TextField
             className="MuiTextField-root"
@@ -217,6 +246,8 @@ const Resumen = () => {
             fullWidth
             margin="normal"
             InputLabelProps={{ shrink: true }}
+            error={!!validationErrors.City}
+            helperText={validationErrors.City}
           />
         </Grid>
         <Grid item xs={12} md={6}>
@@ -230,9 +261,11 @@ const Resumen = () => {
             fullWidth
             margin="normal"
             InputLabelProps={{ shrink: true }}
+            error={!!validationErrors.Provincia}
+            helperText={validationErrors.Provincia}
           />
         </Grid>
-        {/* Dirección y Código Postal en la misma fila */}
+         {/* Dirección y Código Postal en la misma fila */}
         <Grid item xs={12} md={6}>
           <TextField
             className="MuiTextField-root"
@@ -244,8 +277,11 @@ const Resumen = () => {
             fullWidth
             margin="normal"
             InputLabelProps={{ shrink: true }}
+            error={!!validationErrors.Address}
+            helperText={validationErrors.Address}
           />
         </Grid>
+
         <Grid item xs={12} md={6}>
           <TextField
             className="MuiTextField-root"
@@ -257,6 +293,8 @@ const Resumen = () => {
             fullWidth
             margin="normal"
             InputLabelProps={{ shrink: true }}
+            error={!!validationErrors.PostalCode}
+            helperText={validationErrors.PostalCode}
           />
         </Grid>
       </Grid>
