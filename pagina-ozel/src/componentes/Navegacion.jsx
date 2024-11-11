@@ -1,7 +1,6 @@
 // Navegacion.jsx
 import React, { useState } from 'react';
-import { useNavigate, Routes, Route, Link } from 'react-router-dom';
-import axios from 'axios'
+import { Routes, Route, Link } from 'react-router-dom';
 import { useAuth } from './AutentificacionProvider';
 import Login from './Login';
 import Register from './Register';
@@ -21,19 +20,6 @@ const Navegacion = () => {
   const { usuario, estado, logout } = useAuth();
   const [isRegisterModalOpen, setRegisterModalOpen] = useState(false);
   const [isLoginModalOpen, setLoginModalOpen] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [searchResults, setSearchResults] = useState([]);
-  const navigate = useNavigate();
-
-  const handleSearch = async () => {
-    try {
-      const response = await axios.get(`http://localhost:3000/api/productos/buscar`, { params: { query: searchTerm } });
-      setSearchResults(response.data); // Guarda los resultados para mostrarlos
-      navigate('/catalogo', { state: { searchResults: response.data } }); // Navega al catálogo y envía los resultados
-    } catch (error) {
-      console.error('Error en la búsqueda de productos:', error);
-    }
-  };
 
   return (
     <div>
@@ -53,17 +39,15 @@ const Navegacion = () => {
         </div>
         <div className="header-bottom">
           <div className="nav-left">
-          <TextField
+            <TextField
               placeholder="Buscar..."
               variant="outlined"
               size="small"
               className="search-bar"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
               InputProps={{
                 endAdornment: (
                   <InputAdornment position="end">
-                    <IconButton onClick={handleSearch}>
+                    <IconButton>
                       <SearchIcon />
                     </IconButton>
                   </InputAdornment>
@@ -86,7 +70,7 @@ const Navegacion = () => {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/mi-cuenta" element={<MiCuenta />} />
-          <Route path="/catalogo" element={<CatalogoProductos searchResults={searchResults} />} />
+          <Route path="/catalogo" element={<CatalogoProductos />} />
           <Route path="/producto/:id" element={<DetalleProducto />} />
           <Route path="/carrito" element={<Carrito />} /> 
           <Route path="/contacto" element={<Contacto />} /> 

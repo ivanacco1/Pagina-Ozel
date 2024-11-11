@@ -417,34 +417,6 @@ app.delete('/api/tallas/:idTalla', (req, res) => {
 // Ruta estática para servir los archivos de imagen
 app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
 
-
-// Buscar productos
-app.get('/api/productos/buscar', (req, res) => {
-  const { query } = req.query;
-  const sqlQuery = `
-    SELECT * FROM productos 
-    WHERE ProductName LIKE ? 
-    OR Description LIKE ? 
-    OR Color LIKE ? 
-    OR Size LIKE ? 
-    OR Category LIKE ? 
-    OR Subcategory LIKE ?
-  `;
-
-  // Crear un array con el valor de búsqueda para cada campo
-  const searchValues = Array(6).fill(`%${query}%`);
-
-  db.query(sqlQuery, searchValues, (err, results) => {
-    if (err) {
-      console.error('Error en la búsqueda de productos:', err);
-      return res.status(500).json({ message: 'Error al buscar productos' });
-    }
-
-    res.status(200).json(results);
-  });
-});
-
-
 app.listen(PORT, () => {
   console.log(`Servidor corriendo en el puerto ${PORT}`);
 });
