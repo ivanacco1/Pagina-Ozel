@@ -2,7 +2,7 @@
 import React from 'react';
 import { Card, CardContent, CardMedia, Typography, CardActionArea, IconButton, Box } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
-import { useAuth } from './AutentificacionProvider';
+import { useAuth } from '../AutentificacionProvider';
 import { useNavigate } from 'react-router-dom';
 
 const ProductoCard = ({ producto, onEdit }) => {

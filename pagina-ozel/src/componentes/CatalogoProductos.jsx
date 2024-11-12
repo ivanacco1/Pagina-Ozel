@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Grid, Typography, FormControl, FormGroup, FormControlLabel, Checkbox, Box } from '@mui/material';
-import ProductoCard from './ProductoCard'; 
+import { Grid, Typography, Box, TextField, Select, MenuItem, FormControl, InputLabel } from '@mui/material';
+import ProductoCard from './Catalogo/ProductoCard';
 import ProductForm from './ProductForm';
 import { useAuth } from './AutentificacionProvider';
-import '../estilos/Catalogo.css';
+import FiltrosComponentes from './Catalogo/FiltrosComponentes';
+import { cargarFiltros, filtrarProductos } from './Catalogo/FiltrosFunciones';
 
 const CatalogoProductos = () => {
   const { usuario } = useAuth();
@@ -12,207 +13,70 @@ const CatalogoProductos = () => {
   const [categorias, setCategorias] = useState([]);
   const [colores, setColores] = useState([]);
   const [tallas, setTallas] = useState([]);
-  const [filtros, setFiltros] = useState({
-    categoria: {},
-    talla: {},
-    color: {},
-  });
-  const [formValues, setFormValues] = useState({
-    ProductID: '',
-    ProductName: '',
-    Category: '',
-    Subcategory: '',
-    Price: '',
-    Stock: '',
-    Size: '',
-    Color: '',
-    Discount: '',
-    Description: '',
-    Image: null,
-    SaleStart: '',
-    SaleEnd: ''
-  });
+  const [filtros, setFiltros] = useState({ categoria: {}, talla: {}, color: {} });
+  const [formValues, setFormValues] = useState({});
   const [openFormDialog, setOpenFormDialog] = useState(false);
   const [formMode, setFormMode] = useState('edit');
+  const [searchTerm, setSearchTerm] = useState(""); // Estado para la búsqueda
+  const [sortCriteria, setSortCriteria] = useState(''); // Estado para el criterio de ordenación
 
   useEffect(() => {
     cargarProductos();
-    cargarFiltros();
+    cargarFiltros(setCategorias, setColores, setTallas, setFiltros);
   }, []);
 
   const cargarProductos = async () => {
     try {
       const response = await axios.get('http://localhost:3000/api/productos');
-      if (response.status === 200) {
-        setProductos(response.data);
-      } else {
-        console.error('Error al cargar la lista de productos:', response.statusText);
-      }
+      if (response.status === 200) setProductos(response.data);
     } catch (error) {
-      console.error('Error al cargar la lista de productos:', error.response.data.message);
+      console.error('Error al cargar la lista de productos:', error.response?.data?.message);
     }
   };
-
-  const cargarFiltros = async () => {
-    try {
-      const [categoriasRes, coloresRes, tallasRes] = await Promise.all([
-        axios.get('http://localhost:3000/api/categorias'),
-        axios.get('http://localhost:3000/api/colores'),
-        axios.get('http://localhost:3000/api/tallas'),
-      ]);
-  
-      setCategorias(categoriasRes.data);
-      setColores(coloresRes.data);
-      setTallas(tallasRes.data);
-  
-      const categoriasFiltros = categoriasRes.data.reduce((acc, cat) => {
-        if (!acc[cat.categoria]) {
-          acc[cat.categoria] = {
-            isChecked: false,
-            subcategorias: {}
-          };
-        }
-        acc[cat.categoria].subcategorias[cat.subcategoria] = {
-          isChecked: false,
-        };
-        return acc;
-      }, {});
-
-      const TallasFiltros = tallasRes.data.reduce((acc, talla) => {
-          acc[talla.talla] = {
-            isChecked: false,
-          };
-
-        return acc;
-      }, {});
-
-      const ColoresFiltros = coloresRes.data.reduce((acc, color) => {
-        acc[color.color] = {
-          isChecked: false,
-        };
-
-      return acc;
-    }, {});
-      
-  
-      setFiltros({
-        categoria: categoriasFiltros,
-        talla: TallasFiltros,
-        color: ColoresFiltros,
-      });
-    } catch (error) {
-      console.error('Error al cargar filtros:', error.message);
-    }
-
-  };
-
-  useEffect(() => {
-    console.log('Filtros actualizados:', filtros);
-  }, [filtros]);
 
   const handleFiltroChange = (event) => {
     const { name, checked } = event.target;
     const [tipo, categoria, subcategoria] = name.split('.');
-  
-    if (tipo === 'categoria') {
-      if (subcategoria) {
-        // Si se selecciona una subcategoría, marca también la categoría
-        setFiltros((prevFiltros) => ({
-          ...prevFiltros,
-          categoria: {
-            ...prevFiltros.categoria,
-            [categoria]: {
-              ...prevFiltros.categoria[categoria],
-              isChecked: true, // Selecciona la categoría
-              subcategorias: {
-                ...prevFiltros.categoria[categoria].subcategorias,
-                [subcategoria]: { isChecked: checked } // Selecciona o deselecciona la subcategoría
-              }
-            }
+    setFiltros((prevFiltros) => {
+      const newFiltros = { ...prevFiltros };
+      if (tipo === 'categoria') {
+        if (subcategoria) {
+          newFiltros.categoria[categoria].isChecked = true;
+          newFiltros.categoria[categoria].subcategorias[subcategoria].isChecked = checked;
+        } else {
+          newFiltros.categoria[categoria].isChecked = checked;
+          for (const sub of Object.keys(newFiltros.categoria[categoria].subcategorias)) {
+            newFiltros.categoria[categoria].subcategorias[sub].isChecked = checked;
           }
-        }));
-      } else {
-        // Si solo se selecciona la categoría, cambiar el estado de la categoría y las subcategorías
-        setFiltros((prevFiltros) => {
-          const subcategoriasActualizadas = Object.keys(prevFiltros.categoria[categoria].subcategorias).reduce(
-            (acc, subcategoriaKey) => ({
-              ...acc,
-              [subcategoriaKey]: { isChecked: checked } // Deselecciona todas las subcategorías si la categoría es deseleccionada
-            }),
-            {}
-          );
-  
-          return {
-            ...prevFiltros,
-            categoria: {
-              ...prevFiltros.categoria,
-              [categoria]: {
-                ...prevFiltros.categoria[categoria],
-                isChecked: checked,
-                subcategorias: subcategoriasActualizadas
-              }
-            }
-          };
-        });
-      }
-    } else {
-      // Actualizar color o talla
-      setFiltros((prevFiltros) => ({
-        ...prevFiltros,
-        [tipo]: {
-          ...prevFiltros[tipo],
-          [categoria]: { isChecked: checked }
         }
-      }));
-    }
-  };
-
-  const filtrarProductos = () => {
-    return productos.filter((producto) => {
-      const { Category, Subcategory, Size, Color } = producto;
-  
-      // Verificar filtros de categoría y subcategoría (mostrar si al menos una categoría o subcategoría coincide)
-      const categoriaFiltro = Object.keys(filtros.categoria).some((categoria) => {
-        const categoriaData = filtros.categoria[categoria];
-        
-        // Verificar si la categoría o alguna subcategoría está seleccionada
-        const subcategoriasSeleccionadas = Object.values(categoriaData.subcategorias).some(sub => sub.isChecked);
-        
-        // Si ninguna subcategoría ni la categoría están seleccionadas, ignorar esta categoría
-        if (!categoriaData.isChecked && !subcategoriasSeleccionadas) return false;
-  
-        // Si la categoría está seleccionada, verificar si coincide la categoría o alguna subcategoría
-        return (
-          (categoriaData.isChecked && Category === categoria) ||
-          (subcategoriasSeleccionadas && categoriaData.subcategorias[Subcategory]?.isChecked)
-        );
-      });
-  
-      // Verificar filtros de talla (mostrar si al menos una talla coincide)
-      const tallaFiltro = Object.keys(filtros.talla).some((talla) => {
-        if (!filtros.talla[talla].isChecked) return false; // Si no está seleccionada, no considerarla
-        return Size === talla; // Mostrar si la talla coincide
-      });
-  
-      // Verificar filtros de color (mostrar si al menos un color coincide)
-      const colorFiltro = Object.keys(filtros.color).some((color) => {
-        if (!filtros.color[color].isChecked) return false; // Si no está seleccionado, no considerarlo
-        return Color === color; // Mostrar si el color coincide
-      });
-  
-      // Solo aplicar filtros si hay algún filtro seleccionado, sino devolver true
-      const hayFiltrosDeCategoria = Object.keys(filtros.categoria).some(cat => filtros.categoria[cat].isChecked || 
-        Object.values(filtros.categoria[cat].subcategorias).some(sub => sub.isChecked));
-      const hayFiltrosDeTalla = Object.values(filtros.talla).some(talla => talla.isChecked);
-      const hayFiltrosDeColor = Object.values(filtros.color).some(color => color.isChecked);
-  
-      return (!hayFiltrosDeCategoria || categoriaFiltro) &&
-             (!hayFiltrosDeTalla || tallaFiltro) &&
-             (!hayFiltrosDeColor || colorFiltro);
+      } else {
+        newFiltros[tipo][categoria].isChecked = checked;
+      }
+      return newFiltros;
     });
   };
 
-  const productosFiltrados = filtrarProductos();
+  const handleSortChange = (event) => {
+    setSortCriteria(event.target.value);
+  };
+
+  // Filtrar y ordenar productos
+  const productosFiltrados = filtrarProductos(productos, filtros)
+    .filter((producto) => {
+      const lowerSearchTerm = searchTerm.toLowerCase();
+      return (
+        producto.ProductName.toLowerCase().includes(lowerSearchTerm) ||
+        producto.Description.toLowerCase().includes(lowerSearchTerm) ||
+        producto.Category.toLowerCase().includes(lowerSearchTerm) ||
+        producto.Subcategory.toLowerCase().includes(lowerSearchTerm) ||
+        producto.Size.toLowerCase().includes(lowerSearchTerm)
+      );
+    })
+    .sort((a, b) => {
+      if (sortCriteria === 'price') return a.Price - b.Price;
+      if (sortCriteria === 'date') return new Date(b.Date) - new Date(a.Date);
+      return 0;
+    });
 
   const handleEditProductClick = (product) => {
     setFormMode('edit');
@@ -222,103 +86,47 @@ const CatalogoProductos = () => {
 
   return (
     <Box p={2}>
-      <Typography variant="h4" gutterBottom>
+      <Typography variant="h4" component="h2" sx={{ mb: 2 }}>
         Catálogo de Productos
       </Typography>
+      <Box display="flex" alignItems="center" sx={{ mb: 4 }}>
+        <TextField
+          label="Buscar productos"
+          variant="outlined"
+          fullWidth
+          margin="normal"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          sx={{ mr: 2 }}
+        />
+        <FormControl variant="outlined" sx={{ minWidth: 180 }}>
+          <InputLabel>Ordenar por</InputLabel>
+          <Select
+            value={sortCriteria}
+            onChange={handleSortChange}
+            label="Ordenar por"
+          >
+            <MenuItem value="">Sin ordenar</MenuItem>
+            <MenuItem value="price">Precio</MenuItem>
+            <MenuItem value="date">Fecha</MenuItem>
+          </Select>
+        </FormControl>
+      </Box>
       <Grid container spacing={2}>
         <Grid item xs={12} sm={3} md={3} style={{ maxWidth: '250px' }}>
           <Typography variant="h6">Filtrar por</Typography>
-          <FormControl component="fieldset">
-            {/* Categoría */}
-            <Typography variant="subtitle1">Categoría</Typography>
-            <FormGroup style={{ textAlign: 'left' }}>
-              {Object.keys(filtros.categoria).map((categoria) => (
-                <Box key={categoria} ml={1} style={{ display: 'flex', flexDirection: 'column' }}>
-                  {/* Categoría */}
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        checked={filtros.categoria[categoria].isChecked}
-                        onChange={handleFiltroChange}
-                        name={`categoria.${categoria}`}
-                      />
-                    }
-                    label={categoria.charAt(0).toUpperCase() + categoria.slice(1)}
-                    style={{ justifyContent: 'flex-start' }} // Justificar a la izquierda
-                  />
-                  {/* Subcategorías con dentado */}
-                  <Box ml={4} style={{ display: 'flex', flexDirection: 'column' }}>
-                    {Object.keys(filtros.categoria[categoria].subcategorias).map((subcategoria) => (
-                      <FormControlLabel
-                        key={subcategoria}
-                        control={
-                          <Checkbox
-                            checked={filtros.categoria[categoria].subcategorias[subcategoria].isChecked}
-                            onChange={handleFiltroChange}
-                            name={`categoria.${categoria}.${subcategoria}`}
-                          />
-                        }
-                        label={subcategoria.charAt(0).toUpperCase() + subcategoria.slice(1)}
-                        style={{ justifyContent: 'flex-start' }} // Justificar a la izquierda
-                      />
-                    ))}
-                  </Box>
-                </Box>
-              ))}
-            </FormGroup>
-            
-            {/* Talla */}
-            <Typography variant="subtitle1">Talla</Typography>
-            <FormGroup style={{ textAlign: 'left' }}>
-              {Object.keys(filtros.talla).map((talla) => (
-                <FormControlLabel
-                  key={talla}
-                  control={
-                    <Checkbox
-                      checked={filtros.talla[talla].isChecked}
-                      onChange={handleFiltroChange}
-                      name={`talla.${talla}`}
-                    />
-                  }
-                  label={talla.charAt(0).toUpperCase() + talla.slice(1)}
-                  style={{ justifyContent: 'flex-start' }} // Justificar a la izquierda
-                />
-              ))}
-            </FormGroup>
-            
-            {/* Color */}
-            <Typography variant="subtitle1">Color</Typography>
-            <FormGroup style={{ textAlign: 'left' }}>
-              {Object.keys(filtros.color).map((color) => (
-                <FormControlLabel
-                  key={color}
-                  control={
-                    <Checkbox
-                      checked={filtros.color[color].isChecked}
-                      onChange={handleFiltroChange}
-                      name={`color.${color}`}
-                    />
-                  }
-                  label={color.charAt(0).toUpperCase() + color.slice(1)}
-                  style={{ justifyContent: 'flex-start' }} // Justificar a la izquierda
-                />
-              ))}
-            </FormGroup>
-          </FormControl>
+          <FiltrosComponentes filtros={filtros} handleFiltroChange={handleFiltroChange} />
         </Grid>
-  
-        {/* Mostrar productos filtrados */}
         <Grid item xs={12} sm={9} md={9}>
           <Grid container spacing={2}>
             {productosFiltrados.map((producto) => (
-              <Grid item key={producto.ProductID} xs={12} sm={6} md={4} lg={3}>
+              <Grid item key={producto.id} xs={12} sm={6} md={4}>
                 <ProductoCard producto={producto} onEdit={handleEditProductClick} />
               </Grid>
             ))}
           </Grid>
         </Grid>
       </Grid>
-  
       <ProductForm
         open={openFormDialog}
         onClose={() => setOpenFormDialog(false)}
