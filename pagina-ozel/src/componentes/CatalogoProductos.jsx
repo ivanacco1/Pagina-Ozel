@@ -6,8 +6,11 @@ import ProductForm from './ProductForm';
 import { useAuth } from './AutentificacionProvider';
 import FiltrosComponentes from './Catalogo/FiltrosComponentes';
 import { cargarFiltros, filtrarProductos } from './Catalogo/FiltrosFunciones';
+import { useLocation } from 'react-router-dom';
+import '../estilos/Catalogo.css';
 
 const CatalogoProductos = () => {
+  const location = useLocation();
   const { usuario } = useAuth();
   const [productos, setProductos] = useState([]);
   const [categorias, setCategorias] = useState([]);
@@ -21,6 +24,14 @@ const CatalogoProductos = () => {
   const [sortCriteria, setSortCriteria] = useState(''); // Estado para el criterio de ordenación
 
   useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const searchQuery = params.get('search');
+    if (searchQuery) {
+      setSearchTerm(searchQuery);
+    }
+  }, [location.search]);
+
+  useEffect(() => {
     cargarProductos();
     cargarFiltros(setCategorias, setColores, setTallas, setFiltros);
   }, []);
@@ -29,6 +40,7 @@ const CatalogoProductos = () => {
     try {
       const response = await axios.get('http://localhost:3000/api/productos');
       if (response.status === 200) setProductos(response.data);
+      console.log(response.data);
     } catch (error) {
       console.error('Error al cargar la lista de productos:', error.response?.data?.message);
     }
@@ -73,9 +85,18 @@ const CatalogoProductos = () => {
       );
     })
     .sort((a, b) => {
-      if (sortCriteria === 'price') return a.Price - b.Price;
-      if (sortCriteria === 'date') return new Date(b.Date) - new Date(a.Date);
-      return 0;
+      switch (sortCriteria) {
+        case 'priceAsc':
+          return a.Price - b.Price;
+        case 'priceDesc':
+          return b.Price - a.Price;
+        case 'dateAsc':
+          return new Date(a.DateAdded) - new Date(b.DateAdded);
+        case 'dateDesc':
+          return new Date(b.DateAdded) - new Date(a.DateAdded);
+        default:
+          return 0;
+      }
     });
 
   const handleEditProductClick = (product) => {
@@ -89,29 +110,34 @@ const CatalogoProductos = () => {
       <Typography variant="h4" component="h2" sx={{ mb: 2 }}>
         Catálogo de Productos
       </Typography>
-      <Box display="flex" alignItems="center" sx={{ mb: 4 }}>
-        <TextField
-          label="Buscar productos"
-          variant="outlined"
-          fullWidth
-          margin="normal"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          sx={{ mr: 2 }}
-        />
-        <FormControl variant="outlined" sx={{ minWidth: 180 }}>
-          <InputLabel>Ordenar por</InputLabel>
-          <Select
-            value={sortCriteria}
-            onChange={handleSortChange}
-            label="Ordenar por"
-          >
-            <MenuItem value="">Sin ordenar</MenuItem>
-            <MenuItem value="price">Precio</MenuItem>
-            <MenuItem value="date">Fecha</MenuItem>
-          </Select>
-        </FormControl>
-      </Box>
+      <Box display="flex" alignItems="flex-end" gap={2} sx={{ mb: 4 }}>
+  <TextField
+    label="Buscar productos"
+    variant="outlined"
+    fullWidth
+    margin="normal"
+    value={searchTerm}
+    onChange={(e) => setSearchTerm(e.target.value)}
+    sx={{ mb: 0 }} // Asegura que no haya margen inferior extra
+  />
+  <FormControl variant="outlined" sx={{ minWidth: 280, mb: 0, mt: 2 }}> 
+    <InputLabel>Ordenar por</InputLabel>
+    <Select
+      value={sortCriteria}
+      onChange={handleSortChange}
+      label="Ordenar por"
+      MenuProps={{
+        disableScrollLock: true,
+      }}
+    >
+      <MenuItem value="">Sin ordenar</MenuItem>
+      <MenuItem value="priceAsc">Precio Ascendente</MenuItem>
+      <MenuItem value="priceDesc">Precio Descendente</MenuItem>
+      <MenuItem value="dateAsc">Fecha Ascendente</MenuItem>
+      <MenuItem value="dateDesc">Fecha Descendente</MenuItem>
+    </Select>
+  </FormControl>
+</Box>
       <Grid container spacing={2}>
         <Grid item xs={12} sm={3} md={3} style={{ maxWidth: '250px' }}>
           <Typography variant="h6">Filtrar por</Typography>

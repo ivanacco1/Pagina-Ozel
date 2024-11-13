@@ -1,6 +1,6 @@
 // Navegacion.jsx
 import React, { useState } from 'react';
-import { Routes, Route, Link } from 'react-router-dom';
+import { Routes, Route, Link, useNavigate } from 'react-router-dom';
 import { useAuth } from './AutentificacionProvider';
 import Login from './Login';
 import Register from './Register';
@@ -20,6 +20,16 @@ const Navegacion = () => {
   const { usuario, estado, logout } = useAuth();
   const [isRegisterModalOpen, setRegisterModalOpen] = useState(false);
   const [isLoginModalOpen, setLoginModalOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const navigate = useNavigate();
+
+
+  const handleSearch = () => {
+    if (searchTerm.trim()) {
+      navigate(`/catalogo?search=${encodeURIComponent(searchTerm)}`);
+      setSearchTerm('');
+    }
+  };
 
   return (
     <div>
@@ -39,21 +49,24 @@ const Navegacion = () => {
         </div>
         <div className="header-bottom">
           <div className="nav-left">
-            <TextField
-              placeholder="Buscar..."
-              variant="outlined"
-              size="small"
-              className="search-bar"
-              InputProps={{
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton>
-                      <SearchIcon />
-                    </IconButton>
-                  </InputAdornment>
-                ),
-              }}
-            />
+          <TextField
+        placeholder="Buscar..."
+        variant="outlined"
+        size="small"
+        className="search-bar"
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+        onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+        InputProps={{
+          endAdornment: (
+            <InputAdornment position="end">
+              <IconButton onClick={handleSearch}>
+                <SearchIcon />
+              </IconButton>
+            </InputAdornment>
+          ),
+        }}
+      />
           </div>
           <div className="nav-right">
             <Button className="nav-button" component={Link} to="/">INICIO</Button>

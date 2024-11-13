@@ -80,3 +80,7 @@
         max-height: 8rem;
     }
 }
+
+body {
+    overflow-y: scroll;
+  }
