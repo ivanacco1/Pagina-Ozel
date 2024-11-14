@@ -100,20 +100,19 @@ const ProductForm = ({ open, onClose, onFormSubmit, formMode, formValues, setFor
           alert('Producto actualizado correctamente.');
         } else {
           console.error('Error al actualizar el producto:', error.response.data.message);
-          alert('Error al actualizar el producto: '  + error.response.data.message);
+          alert('Error al actualizar el producto: ' + error.response.data.message);
         }
       }
       onFormSubmit();
     } catch (error) {
       console.error('Error al enviar el formulario:', error.response.data.message);
-      alert('Error al enviar el formulario: '  + error.response.data.message);
+      alert('Error al enviar el formulario: ' + error.response.data.message);
     } finally {
       onClose();
     }
   };
 
   const handleClose = () => {
-    // Resetea los valores del formulario y el nombre del archivo seleccionado
     setFormValues({
       ProductID: '',
       ProductName: '',
@@ -126,8 +125,6 @@ const ProductForm = ({ open, onClose, onFormSubmit, formMode, formValues, setFor
       Discount: '',
       Description: '',
       Image: null,
-      SaleStart: '',
-      SaleEnd: ''
     });
     setSelectedFileName('');
     onClose();
@@ -193,9 +190,9 @@ const ProductForm = ({ open, onClose, onFormSubmit, formMode, formValues, setFor
           </TextField>
 
           <Box display="flex" alignItems="center" mt={2}>
-          <Button variant="contained" color="primary" onClick={() => setIsCategoriaModalOpen(true)}>
-            Gestionar Categorías
-          </Button>
+            <Button variant="contained" color="primary" onClick={() => setIsCategoriaModalOpen(true)}>
+              Gestionar Categorías
+            </Button>
           </Box>
           <TextField
             select
@@ -212,9 +209,9 @@ const ProductForm = ({ open, onClose, onFormSubmit, formMode, formValues, setFor
             ))}
           </TextField>
           <Box display="flex" alignItems="center" mt={2}>
-          <Button variant="contained" color="primary" onClick={() => setIsColorModalOpen(true)}>
-            Gestionar Colores
-          </Button>
+            <Button variant="contained" color="primary" onClick={() => setIsColorModalOpen(true)}>
+              Gestionar Colores
+            </Button>
           </Box>
           <TextField
             select
@@ -232,9 +229,9 @@ const ProductForm = ({ open, onClose, onFormSubmit, formMode, formValues, setFor
           </TextField>
 
           <Box display="flex" alignItems="center" mt={2}>
-          <Button variant="contained" color="primary" onClick={() => setIsTallaModalOpen(true)} >
-            Gestionar Tallas
-          </Button>
+            <Button variant="contained" color="primary" onClick={() => setIsTallaModalOpen(true)}>
+              Gestionar Tallas
+            </Button>
           </Box>
           <TextField
             required
@@ -253,11 +250,12 @@ const ProductForm = ({ open, onClose, onFormSubmit, formMode, formValues, setFor
             onChange={handleFormChange}
           />
           <TextField
-            label="Descuento"
+            label="Descuento (%)"
             name="Discount"
             type="number"
             value={formValues.Discount}
             onChange={handleFormChange}
+            inputProps={{ min: 0, max: 100 }}
           />
           <TextField
             label="Descripción"
@@ -285,58 +283,19 @@ const ProductForm = ({ open, onClose, onFormSubmit, formMode, formValues, setFor
               </Typography>
             )}
           </Box>
-          <TextField
-            label="Inicio de Oferta"
-            name="SaleStart"
-            type="date"
-            value={formValues.SaleStart}
-            onChange={handleFormChange}
-            InputLabelProps={{
-              shrink: true,
-            }}
-          />
-          <TextField
-            label="Fin de Oferta"
-            name="SaleEnd"
-            type="date"
-            value={formValues.SaleEnd}
-            onChange={handleFormChange}
-            InputLabelProps={{
-              shrink: true,
-            }}
-          />
         </Box>
       </DialogContent>
       <DialogActions>
-        <Button onClick={handleClose} color="primary">Cancelar</Button>
-        <Button onClick={handleSubmit} color="primary" variant="contained">
-          {formMode === 'add' ? 'Añadir' : 'Guardar'}
+        <Button onClick={handleClose} color="secondary">
+          Cancelar
+        </Button>
+        <Button onClick={handleSubmit} color="primary">
+          Guardar
         </Button>
       </DialogActions>
-
-      <CategoriaModal
-        open={isCategoriaModalOpen}
-        onClose={() => {
-          setIsCategoriaModalOpen(false);
-          fetchCategorias();}}
-        onSave={handleCategoriaSave}
-      />
-
-      <ColorModal
-        open={isColorModalOpen}
-        onClose={() => {
-          setIsColorModalOpen(false);
-          fetchColores();}}
-        onSave={() => fetchColores()}
-      />
-
-      <TallaModal
-        open={isTallaModalOpen}
-        onClose={() => {
-          setIsTallaModalOpen(false);
-          fetchTallas();}}
-        onSave={() => fetchTallas()}
-      />
+      <CategoriaModal open={isCategoriaModalOpen} onClose={() => setIsCategoriaModalOpen(false)} onSave={handleCategoriaSave} />
+      <ColorModal open={isColorModalOpen} onClose={() => setIsColorModalOpen(false)} />
+      <TallaModal open={isTallaModalOpen} onClose={() => setIsTallaModalOpen(false)} />
     </Dialog>
   );
 };

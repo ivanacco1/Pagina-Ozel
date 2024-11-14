@@ -10,8 +10,12 @@ const ProductoCard = ({ producto, onEdit }) => {
   const navigate = useNavigate();
 
   const isAuthorized = usuario?.Role === 'admin' || usuario?.Role === 'gestor';
-
   const imageUrl = producto.ImageURL ? encodeURI(producto.ImageURL) : '';
+
+  // Calcula el precio con descuento si Discount es mayor a 0
+  const price = Number(producto.Price) || 0;
+  const discount = Number(producto.Discount) || 0;
+  const discountedPrice = discount > 0 ? price * (1 - discount / 100) : price;
 
   const handleCardClick = () => {
     navigate(`/producto/${producto.ProductID}`, { state: { producto } });
@@ -20,19 +24,73 @@ const ProductoCard = ({ producto, onEdit }) => {
   return (
     <Card>
       <CardActionArea onClick={handleCardClick}>
-        <CardMedia
-          component="img"
-          height="340"
-          image={imageUrl}
-          alt={producto.ProductName}
-        />
+        <Box position="relative">
+          <CardMedia
+            component="img"
+            height="340"
+            image={imageUrl}
+            alt={producto.ProductName}
+          />
+          {discount > 0 && (
+            <Box
+              position="absolute"
+              top={8}
+              right={8}
+              bgcolor="red"
+              color="white"
+              borderRadius="50%"
+              width="40px"
+              height="40px"
+              display="flex"
+              alignItems="center"
+              justifyContent="center"
+            >
+              -{discount}%
+            </Box>
+          )}
+        </Box>
         <CardContent>
           <Typography gutterBottom variant="h6" component="div" style={{ fontWeight: 'bold' }}>
             {producto.ProductName}
           </Typography>
-          <Typography variant="body1" component="div" style={{ fontWeight: 'bold' }}>
-            ${producto.Price}
-          </Typography>
+
+          {/* Contenedor para centrar y mostrar los precios */}
+          <Box display="flex" justifyContent="center" alignItems="center" gap={1}>
+            {discount > 0 ? (
+              <>
+                <Typography
+                  variant="body1"
+                  component="span"
+                  style={{
+                    textDecoration: 'line-through',
+                    color: 'gray',
+                    fontWeight: 'bold',
+                  }}
+                >
+                  ${price.toFixed(2)}
+                </Typography>
+                <Typography
+                  variant="body1"
+                  component="span"
+                  style={{
+                    color: 'red',
+                    fontWeight: 'bold',
+                  }}
+                >
+                  ${discountedPrice.toFixed(2)}
+                </Typography>
+              </>
+            ) : (
+              <Typography
+                variant="body1"
+                component="span"
+                style={{ fontWeight: 'bold' }}
+              >
+                ${price.toFixed(2)}
+              </Typography>
+            )}
+          </Box>
+
           <Typography variant="body2" component="div" style={{ color: 'gray' }}>
             HASTA 12 CUOTAS
           </Typography>

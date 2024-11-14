@@ -94,6 +94,8 @@ const CatalogoProductos = () => {
           return new Date(a.DateAdded) - new Date(b.DateAdded);
         case 'dateDesc':
           return new Date(b.DateAdded) - new Date(a.DateAdded);
+        case 'descuento':
+          return b.Discount - a.Discount;
         default:
           return 0;
       }
@@ -118,7 +120,7 @@ const CatalogoProductos = () => {
     margin="normal"
     value={searchTerm}
     onChange={(e) => setSearchTerm(e.target.value)}
-    sx={{ mb: 0 }} // Asegura que no haya margen inferior extra
+    sx={{ mb: 0 }} 
   />
   <FormControl variant="outlined" sx={{ minWidth: 280, mb: 0, mt: 2 }}> 
     <InputLabel>Ordenar por</InputLabel>
@@ -135,6 +137,7 @@ const CatalogoProductos = () => {
       <MenuItem value="priceDesc">Precio Descendente</MenuItem>
       <MenuItem value="dateAsc">Fecha Ascendente</MenuItem>
       <MenuItem value="dateDesc">Fecha Descendente</MenuItem>
+      <MenuItem value="descuento">Descuento</MenuItem>
     </Select>
   </FormControl>
 </Box>
