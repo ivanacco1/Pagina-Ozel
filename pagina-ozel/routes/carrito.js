@@ -29,12 +29,18 @@ export const agregar = async (req, res) => {
 
   
 
-  // Endpoint para obtener los productos del carrito de un usuario
-  export const carritoUsuario = async (req, res) => {
+// Endpoint para obtener los productos del carrito de un usuario con descuento aplicado
+export const carritoUsuario = async (req, res) => {
   const { accountId } = req.params;
 
   const query = `
-    SELECT c.Quantity, p.ProductID, p.ProductName, p.Price
+    SELECT 
+      c.Quantity, 
+      p.ProductID, 
+      p.ProductName, 
+      p.Price, 
+      p.Discount,
+      p.Price * (1 - (p.Discount / 100)) AS DiscountedPrice
     FROM Carrito c
     JOIN Productos p ON c.Productos_ProductID = p.ProductID
     WHERE c.Usuarios_AccountID = ?
@@ -49,7 +55,6 @@ export const agregar = async (req, res) => {
     res.status(200).json(results);
   });
 };
-
 
 // Endpoint para actualizar la cantidad de un producto en el carrito
 export const actualizar = async (req, res) => {

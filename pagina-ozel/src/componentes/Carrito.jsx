@@ -28,6 +28,8 @@ const Carrito = () => {
       const response = await axios.get(`http://localhost:5000/api/carrito/${usuario.UserId}`);
       if (response.status === 200) {
         setCarrito(response.data);
+        
+        console.log(response.data);
         calcularCostoTotal(response.data);
       } else {
         console.error('Error al cargar el carrito:', response.statusText);
@@ -38,8 +40,11 @@ const Carrito = () => {
   };
 
   const calcularCostoTotal = (cartItems) => {
-    const total = cartItems.reduce((acc, item) => acc + item.Quantity * item.Price, 0);
-    setTotalCost(total);
+    const total = cartItems.reduce((acc, item) => {
+      const precioConDescuento = item.Price * (1 - (item.Discount || 0) / 100);
+      return acc + item.Quantity * precioConDescuento;
+    }, 0);
+    setTotalCost(total.toFixed(2)); // Redondear a 2 decimales
   };
 
   const handleQuantityChange = async (productId, newQuantity) => {
@@ -88,30 +93,29 @@ const Carrito = () => {
     }
   };
 
-  // Callback cuando se hace clic en el botón de Wallet
   const onSubmit = async (formData) => {
     try {
-      const items = carrito.map((item) => ({
-        title: item.ProductName,
-        quantity: item.Quantity,
-        price: item.Price,
-      }));
-
+      const items = carrito.map((item) => {
+        const precioConDescuento = item.Price * (1 - (item.Discount || 0) / 100);
+        return {
+          title: item.ProductName,
+          quantity: item.Quantity,
+          price: precioConDescuento.toFixed(2),
+        };
+      });
+  
       const items2 = carrito.map((item) => ({
         ProductID: item.ProductID,
         Quantity: item.Quantity,
-        Price: item.Price,
+        Price: item.Price * (1 - (item.Discount || 0) / 100),
       }));
-
-      // Guardar el pedido en la base de datos y enviar items2 como Productos
-      await guardarPedido(usuario, totalCost, items2); 
-
-      // Limpiar el carrito después de guardar el pedido
+  
+      await guardarPedido(usuario, totalCost, items2);
       await limpiarCarrito();
-
+  
       const response = await axios.post("http://localhost:4500/create_preference", { items });
       return new Promise((resolve) => {
-        resolve(response.data.id); // Resuelve con el ID de la preferencia
+        resolve(response.data.id);
       });
     } catch (error) {
       console.error('Error al crear la preferencia:', error);
@@ -154,39 +158,72 @@ const Carrito = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {carrito.map((item) => (
-                <TableRow key={item.ProductID}>
-                  <TableCell component="th" scope="row">
-                    {item.ProductName}
-                  </TableCell>
-                  <TableCell align="right">${item.Price}</TableCell>
-                  <TableCell align="right">
-                    <IconButton onClick={() => handleQuantityChange(item.ProductID, item.Quantity - 1)} disabled={item.Quantity <= 1} style={{ outline: 'none' }} >
-                      <Remove />
-                    </IconButton>
-                    {item.Quantity}
-                    <IconButton onClick={() => handleQuantityChange(item.ProductID, item.Quantity + 1)} style={{ outline: 'none' }}>
-                      <Add />
-                    </IconButton>
-                  </TableCell>
-                  <TableCell align="right">
-                    <IconButton onClick={() => handleRemoveFromCart(item.ProductID)} style={{ outline: 'none' }}>
-                      <Delete />
-                    </IconButton>
-                  </TableCell>
-                </TableRow>
-              ))}
-              <TableRow>
-                <TableCell colSpan={2} align="right"><Typography variant="h6">Total:</Typography></TableCell>
-                <TableCell align="right"><Typography variant="h6">${totalCost}</Typography></TableCell>
-                <TableCell align="right">
-      {/* Botón que simula el clic en el botón de Wallet */}
-      <Button variant="contained" color="primary" onClick={handleClickSimulate} disabled={loading}>
+  {carrito.map((item) => {
+    const precioConDescuento = item.Price * (1 - (item.Discount || 0) / 100);
+
+    return (
+      <TableRow key={item.ProductID}>
+        <TableCell component="th" scope="row">{item.ProductName}</TableCell>
+        <TableCell align="right">
+          {item.Discount > 0 ? (
+            <>
+              <Typography
+                variant="body2"
+                
+              >
+                ${precioConDescuento}
+              </Typography>
+            </>
+          ) : (
+            <Typography variant="body2">${item.Price}</Typography>
+          )}
+        </TableCell>
+        <TableCell align="right">
+          <IconButton
+            onClick={() => handleQuantityChange(item.ProductID, item.Quantity - 1)}
+            disabled={item.Quantity <= 1}
+            style={{ outline: 'none' }}
+          >
+            <Remove />
+          </IconButton>
+          {item.Quantity}
+          <IconButton
+            onClick={() => handleQuantityChange(item.ProductID, item.Quantity + 1)}
+            style={{ outline: 'none' }}
+          >
+            <Add />
+          </IconButton>
+        </TableCell>
+        <TableCell align="right">
+          <IconButton
+            onClick={() => handleRemoveFromCart(item.ProductID)}
+            style={{ outline: 'none' }}
+          >
+            <Delete />
+          </IconButton>
+        </TableCell>
+      </TableRow>
+    );
+  })}
+  <TableRow>
+    <TableCell colSpan={2} align="right">
+      <Typography variant="h6">Total:</Typography>
+    </TableCell>
+    <TableCell align="right">
+      <Typography variant="h6">${totalCost}</Typography>
+    </TableCell>
+    <TableCell align="right">
+      <Button
+        variant="contained"
+        color="primary"
+        onClick={handleClickSimulate}
+        disabled={loading}
+      >
         {loading ? <CircularProgress size={24} /> : 'Pagar con Mercado Pago'}
       </Button>
-                </TableCell>
-              </TableRow>
-            </TableBody>
+    </TableCell>
+  </TableRow>
+</TableBody>
           </Table>
         </TableContainer>
       )}

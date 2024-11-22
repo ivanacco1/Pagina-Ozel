@@ -55,7 +55,7 @@ const formatDate = (date) => {
 
 
 app.get('/api/productos', productosController.lista);
-app.delete('/api/productos/:id', productosController.borrar);
+app.delete('/api/productos/:id', (req, res) => productosController.borrar(req, res, __dirname));
 app.post('/api/productos', upload.single('Image'), productosController.crear);
 app.put('/api/productos/:id', upload.single('Image'), productosController.actualizar);
 

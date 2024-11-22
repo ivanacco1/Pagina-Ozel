@@ -14,7 +14,13 @@ const ProductoCard = ({ producto, onEdit }) => {
 
   // Calcula el precio con descuento si Discount es mayor a 0
   const price = Number(producto.Price) || 0;
-  const discount = Number(producto.Discount) || 0;
+  let discount = Number(producto.Discount) || 0;
+
+  // Asegurar que el descuento no exceda el 99%
+  if (discount > 99) {
+    discount = 99;
+  }
+
   const discountedPrice = discount > 0 ? price * (1 - discount / 100) : price;
 
   const handleCardClick = () => {
@@ -45,7 +51,7 @@ const ProductoCard = ({ producto, onEdit }) => {
               alignItems="center"
               justifyContent="center"
             >
-              -{discount}%
+              -{discount}%{/* Muestra el descuento corregido */}
             </Box>
           )}
         </Box>

@@ -7,6 +7,7 @@ import multer from 'multer';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import db from '../db.js';
+import fs from 'fs';
 
 const PORT = process.env.PORT || 3000;
 
@@ -49,51 +50,74 @@ const formatDate = (date) => {
     });
   };
 
+// Función para eliminar un producto
+export const borrar = async (req, res) => {
+  const { id } = req.params;
+  const { AdminPassword, AccountID } = req.body;
 
-  // Endpoint para eliminar productos
-  export const borrar = async (req, res) => {
-    const { id } = req.params;
-    const { AdminPassword, AccountID } = req.body;
-  
-    if (!AdminPassword || !AccountID) {
-      return res.status(400).json({ message: 'La contraseña del administrador y el ID de la cuenta son obligatorios' });
+  if (!AdminPassword || !AccountID) {
+    return res.status(400).json({ message: 'La contraseña del administrador y el ID de la cuenta son obligatorios' });
+  }
+
+  // Verifica la contraseña del administrador
+  const query = 'SELECT Password FROM Usuarios WHERE AccountID = ? AND Role = "admin"';
+  db.query(query, [AccountID], async (err, results) => {
+    if (err) {
+      console.error('Error verificando la contraseña del administrador:', err);
+      return res.status(500).json({ message: 'Error verificando la contraseña del administrador' });
     }
-  
-    // Verifica la contraseña del administrador
-    const query = 'SELECT Password FROM Usuarios WHERE AccountID = ? AND Role = "admin"';
-    db.query(query, [AccountID], async (err, results) => {
+
+    if (results.length === 0) {
+      return res.status(403).json({ message: 'Permisos insuficientes o cuenta no encontrada' });
+    }
+
+    const admin = results[0];
+    const isPasswordCorrect = await bcrypt.compare(AdminPassword, admin.Password);
+    if (!isPasswordCorrect) {
+      return res.status(403).json({ message: 'Contraseña del administrador incorrecta' });
+    }
+
+    // Recupera la URL de la imagen asociada al producto
+    const selectQuery = 'SELECT ImageURL FROM Productos WHERE ProductID = ?';
+    db.query(selectQuery, [id], (err, selectResults) => {
       if (err) {
-        console.error('Error verificando la contraseña del administrador:', err);
-        return res.status(500).json({ message: 'Error verificando la contraseña del administrador' });
+        console.error('Error recuperando la URL de la imagen:', err);
+        return res.status(500).json({ message: 'Error al recuperar la información del producto' });
       }
-  
-      if (results.length === 0) {
-        return res.status(403).json({ message: 'Permisos insuficientes o cuenta no encontrada' });
+
+      if (selectResults.length === 0) {
+        return res.status(404).json({ message: 'Producto no encontrado' });
       }
-  
-      const admin = results[0];
-      const isPasswordCorrect = await bcrypt.compare(AdminPassword, admin.Password);
-      if (!isPasswordCorrect) {
-        return res.status(403).json({ message: 'Contraseña del administrador incorrecta' });
+
+      const { ImageURL } = selectResults[0];
+
+      // Si existe una imagen asociada, intenta eliminarla del sistema de archivos
+      if (ImageURL) {
+        const imagePath = path.join(__dirname, '..', 'public', 'uploads', path.basename(ImageURL)); // Asegúrate de usar path.join
+        fs.unlink(imagePath, unlinkErr => {
+          if (unlinkErr) {
+            console.error('Error eliminando el archivo de la imagen:', unlinkErr);
+          }
+        });
       }
-  
-      // Eliminar el producto
+
+      // Elimina el producto de la base de datos
       const deleteQuery = 'DELETE FROM Productos WHERE ProductID = ?';
       db.query(deleteQuery, [id], (err, deleteResults) => {
         if (err) {
           console.error('Error eliminando el producto de la base de datos:', err);
           return res.status(500).json({ message: 'Producto actualmente en un carrito o pedido' });
         }
-  
+
         if (deleteResults.affectedRows === 0) {
           return res.status(404).json({ message: 'Producto no encontrado' });
         }
-  
+
         res.status(204).send();
       });
     });
-  };
-
+  });
+};
 
   
 // Endpoint para crear productos
