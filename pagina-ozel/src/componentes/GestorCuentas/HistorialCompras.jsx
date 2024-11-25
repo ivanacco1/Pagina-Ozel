@@ -40,7 +40,7 @@ const HistorialCompras = ({ userId }) => {
       });
 
       if (response.status === 200) {
-        // Actualizar el historial en la UI
+        // Actualiza el historial en la UI
         setHistorial((prevHistorial) => 
           prevHistorial.map((pedido) =>
             pedido.OrderID === orderId ? { ...pedido, Status: newStatus } : pedido

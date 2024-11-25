@@ -124,7 +124,7 @@ const createUserDataComplete = (user) => {
   
     //console.log(req.body);
   
-    // Validar datos de entrada
+    // Valida datos de entrada
     if (!AdminPassword) {
       if (!FirstName || !LastName || !Email) {
         return res.status(400).json({ message: 'Todos los campos obligatorios deben ser proporcionados' });
@@ -132,9 +132,9 @@ const createUserDataComplete = (user) => {
     }
   
   
-    // Definir Función para actualizar el usuario
+    // DefinirFunción para actualizar el usuario
     const updateUser = async (hashedPassword) => {
-      // Crear la consulta SQL para actualizar el usuario
+      // Crea la consulta SQL para actualizar el usuario
       let query = `UPDATE Usuarios SET FirstName = ?, LastName = ?, Email = ?, 
                     ${hashedPassword ? 'Password = ?, ' : ''} Phone = ?, Address = ?, City = ?, Provincia = ?, PostalCode = ? 
                     ${Role ? ', Role = ?' : ''} 
@@ -150,14 +150,14 @@ const createUserDataComplete = (user) => {
       }
       values.push(userId);
   
-      // Ejecutar la consulta SQL
+      // Ejecuta la consulta SQL
       db.query(query, values, (err, results) => {
         if (err) {
           console.error('Error actualizando el usuario en la base de datos:', err);
           return res.status(501).json({ message: 'Error actualizando el usuario' });
         }
   
-        // Consultar y devolver los datos actualizados del usuario
+        // Consulta y devuelve los datos actualizados del usuario
         db.query('SELECT * FROM Usuarios WHERE AccountID = ?', [userId], (err, updatedUser) => {
           if (err) {
             console.error('Error obteniendo el usuario actualizado de la base de datos:', err);
@@ -207,7 +207,7 @@ const createUserDataComplete = (user) => {
   
   
     //console.log(userId);
-    // Verificar si el correo electrónico ya está en uso por otro usuario
+    // Verifica si el correo electrónico ya está en uso por otro usuario
     const checkEmailQuery = 'SELECT * FROM Usuarios WHERE Email = ? AND AccountID != ?';
     db.query(checkEmailQuery, [Email, userId], (err, results) => {
       if (err) {
@@ -234,7 +234,7 @@ const createUserDataComplete = (user) => {
             return res.status(403).json({ message: 'La contraseña ingresada es incorrecta' });
           }
   
-          // Verificar si hay nueva contraseña
+          // Verifica si hay nueva contraseña
           if (NewPassword) {
             let hashedPassword;
             try {
@@ -295,7 +295,7 @@ const createUserDataComplete = (user) => {
       }
   
   
-      // Formatear la fecha en cada pedido
+      // Formatea la fecha en cada pedido
       const formattedResults = results.map(result => {
         return {
           ...result,
@@ -304,7 +304,7 @@ const createUserDataComplete = (user) => {
       });
   
   
-      // Mapeamos los resultados para crear la lista de usuarios
+      // Mapea los resultados para crear la lista de usuarios
       const usuarios = formattedResults.map(user => createUserDataComplete(user));
   
       res.status(200).json(usuarios);
@@ -319,30 +319,30 @@ const createUserDataComplete = (user) => {
   // Consulta para obtener la contraseña hash del usuario
   const query = 'SELECT Password FROM usuarios WHERE AccountID = ?';
 //console.log(req.body);
-  // Ejecutar la consulta
+  // Ejecuta la consulta
   db.query(query, [UserId], (err, results) => {
     if (err) {
       return res.status(501).json({ error: 'Error al validar la contraseña' });
     }
 
-    // Si no se encuentra al usuario
+    // Si no se encuentra al usuario, devuelve error
     if (results.length === 0) {
       return res.status(404).json({ error: 'Usuario no encontrado' });
     }
 
     const hashedPassword = results[0].Password;
 
-    // Comparar la contraseña proporcionada con la almacenada (hash)
+    // Compara la contraseña proporcionada con la almacenada (hash)
     bcrypt.compare(Password, hashedPassword, (err, isMatch) => {
       if (err) {
         return res.status(500).json({ error: 'Error al comparar la contraseña' });
       }
 
-      // Si la contraseña coincide
+      
       if (isMatch) {
         res.status(200).json({ message: 'Contraseña válida' });
       } else {
-        // Si la contraseña es incorrecta
+    
         res.status(401).json({ error: 'Contraseña incorrecta' });
       }
     });
@@ -355,13 +355,13 @@ export const borrar = (req, res) => {
   const adminId = req.params.id;
   const { AdminPassword, TargetID } = req.body;
 
-  // Verificar que todos los datos necesarios están presentes
+  // Verifica que todos los datos necesarios están presentes
   if (!AdminPassword || !TargetID) {
     return res.status(400).json({ message: 'AdminPassword y TargetID son obligatorios' });
   }
 
   try {
-    // Obtener la contraseña del administrador de la base de datos
+    // Obtiene la contraseña del administrador de la base de datos
     const query = 'SELECT Password, Role FROM Usuarios WHERE AccountID = ?';
     db.query(query, [adminId], async (err, results) => {
       if (err) {
@@ -375,19 +375,19 @@ export const borrar = (req, res) => {
 
       const admin = results[0];
 
-      // Verificar que el usuario es administrador
+      // Verifica que el usuario es administrador
       if (admin.Role !== 'admin') {
         return res.status(403).json({ message: 'Solo los administradores pueden eliminar usuarios' });
       }
 
-      // Comparar la contraseña ingresada con la contraseña hasheada en la base de datos
+      // Compara la contraseña ingresada con la contraseña hasheada en la base de datos
       const isMatch = await bcrypt.compare(AdminPassword, admin.Password);
 
       if (!isMatch) {
         return res.status(403).json({ message: 'Contraseña de administrador incorrecta' });
       }
 
-      // Eliminar el usuario especificado por TargetID
+      // Elimina el usuario especificado por TargetID
       const deleteQuery = 'DELETE FROM Usuarios WHERE AccountID = ?';
       db.query(deleteQuery, [TargetID], (err, results) => {
         if (err) {

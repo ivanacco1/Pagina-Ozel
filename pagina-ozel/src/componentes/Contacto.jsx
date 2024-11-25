@@ -22,7 +22,7 @@ const Contacto = () => {
         <Button
           variant="contained"
           color="success"
-          href="https://wa.me/+123456789" // Reemplaza con tu número de WhatsApp real
+          href="https://wa.me/+123456789" // Numero de Whatsapp ficticio
           startIcon={<WhatsAppIcon />}
           sx={{ marginTop: '20px' }}
         >

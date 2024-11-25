@@ -9,10 +9,10 @@ const CategoriaModal = ({ open, onClose, onCategoriaCreated }) => {
   const [subcategoria, setSubcategoria] = useState('');
 
   useEffect(() => {
-    const fetchCategorias = async () => {
+    const fetchCategorias = async () => { //consigue las categorias para mostrar en el menu de crear nueva
       try {
         const response = await axios.get('http://localhost:3000/api/categorias');
-        // Filtrar categorías duplicadas antes de establecer el estado
+        // Filtra las categorías duplicadas antes de establecer el estado
         const uniqueCategorias = response.data.filter(
           (cat, index, self) =>
             index === self.findIndex((c) => c.categoria === cat.categoria)
@@ -34,7 +34,7 @@ const CategoriaModal = ({ open, onClose, onCategoriaCreated }) => {
       return;
     }
 
-    try {
+    try { //guarda la nueva categoria en bbdd
       const categoriaToSubmit = newCategoria || selectedCategoria;
       const response = await axios.post('http://localhost:3000/api/categorias', {
         categoria: categoriaToSubmit,

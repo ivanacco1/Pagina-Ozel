@@ -2,12 +2,12 @@ import React from 'react';
 import { useLocation } from 'react-router-dom';
 import axios from 'axios';
 import { Box, Typography, Button, Grid } from '@mui/material';
-import { useAuth } from './AutentificacionProvider'; // Importa el proveedor de autenticación
+import { useAuth } from './AutentificacionProvider'; 
 
 const DetalleProducto = () => {
   const location = useLocation();
   const { producto } = location.state || {};
-  const { usuario } = useAuth(); // Obtén el usuario autenticado
+  const { usuario } = useAuth(); 
 
   if (!producto) {
     return <Typography>No se encontró el producto</Typography>;
@@ -17,7 +17,7 @@ const DetalleProducto = () => {
   const price = Number(producto.Price) || 0;
   let discount = Number(producto.Discount) || 0;
 
-  // Asegurar que el descuento no exceda el 99%
+  // Asegura que el descuento no exceda el 99%
   if (discount > 99) {
     discount = 99;
   }
@@ -31,7 +31,7 @@ const DetalleProducto = () => {
     }
 
     const cartItem = {
-      Quantity: 1, // TODO: Cambiar esto en el futuro
+      Quantity: 1, // Añade 1 item en el carrito
       Productos_ProductID: producto.ProductID,
       Usuarios_AccountID: usuario.UserId,
     };

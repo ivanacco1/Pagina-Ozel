@@ -2,7 +2,7 @@ import axios from 'axios';
 
 export const cargarFiltros = async (setCategorias, setColores, setTallas, setFiltros) => {
   try {
-    const [categoriasRes, coloresRes, tallasRes] = await Promise.all([
+    const [categoriasRes, coloresRes, tallasRes] = await Promise.all([ //carga todos los filtros existentes de la bbdd
       axios.get('http://localhost:3000/api/categorias'),
       axios.get('http://localhost:3000/api/colores'),
       axios.get('http://localhost:3000/api/tallas'),
@@ -12,7 +12,7 @@ export const cargarFiltros = async (setCategorias, setColores, setTallas, setFil
     setColores(coloresRes.data);
     setTallas(tallasRes.data);
 
-    const categoriasFiltros = categoriasRes.data.reduce((acc, cat) => {
+    const categoriasFiltros = categoriasRes.data.reduce((acc, cat) => { //arma los filtros de forma dinámica
       if (!acc[cat.categoria]) {
         acc[cat.categoria] = {
           isChecked: false,
@@ -43,27 +43,35 @@ export const cargarFiltros = async (setCategorias, setColores, setTallas, setFil
   }
 };
 
-export const filtrarProductos = (productos, filtros) => {
+export const filtrarProductos = (productos, filtros) => { //función de la lógica de los filtros
   return productos.filter((producto) => {
     const { Category, Subcategory, Size, Color } = producto;
-    
+
+     // Verifica filtros de categoría y subcategoría 
     const categoriaFiltro = Object.keys(filtros.categoria).some((categoria) => {
       const categoriaData = filtros.categoria[categoria];
+
+       // Verifica si la categoría o alguna subcategoría está seleccionada
       const subcategoriasSeleccionadas = Object.values(categoriaData.subcategorias).some((sub) => sub.isChecked);
+
+       // Si la categoría está seleccionada, verifica si coincide la categoría o alguna subcategoría
       return (
         (categoriaData.isChecked && Category === categoria) ||
         (subcategoriasSeleccionadas && categoriaData.subcategorias[Subcategory]?.isChecked)
       );
     });
 
+    // Verifica filtros de talla 
     const tallaFiltro = Object.keys(filtros.talla).some((talla) => {
       return filtros.talla[talla].isChecked && Size === talla;
     });
 
+       // Verifica filtros de color
     const colorFiltro = Object.keys(filtros.color).some((color) => {
       return filtros.color[color].isChecked && Color === color;
     });
 
+     // Si no hay filtros activos, devuelve todos los productos
     return (
       (!Object.values(filtros.categoria).some((cat) => cat.isChecked) || categoriaFiltro) &&
       (!Object.values(filtros.talla).some((talla) => talla.isChecked) || tallaFiltro) &&

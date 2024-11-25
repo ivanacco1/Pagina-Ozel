@@ -4,7 +4,7 @@ import axios from 'axios';
 import { useAuth } from './AutentificacionProvider';
 import { Add, Remove, Delete } from '@mui/icons-material';
 import { initMercadoPago, Wallet } from '@mercadopago/sdk-react';
-import guardarPedido from './Carrito/GuardarPedido'; // Importar la función guardarPedido
+import guardarPedido from './Carrito/GuardarPedido'; 
 
 const Carrito = () => {
   const { usuario } = useAuth();
@@ -13,7 +13,7 @@ const Carrito = () => {
   const [loading, setLoading] = useState(false); // Estado para la animación de "Cargando"
   const walletButtonRef = useRef(null); // Ref para el botón de Wallet
 
-  initMercadoPago('APP_USR-d5acf825-4ea7-4a19-a692-9305e2907c99', {
+  initMercadoPago('APP_USR-d5acf825-4ea7-4a19-a692-9305e2907c99', { //credenciales de prueba
     locale: "es-AR"
   });
 
@@ -25,7 +25,7 @@ const Carrito = () => {
 
   const cargarCarrito = async () => {
     try {
-      const response = await axios.get(`http://localhost:5000/api/carrito/${usuario.UserId}`);
+      const response = await axios.get(`http://localhost:5000/api/carrito/${usuario.UserId}`); //carga carrito guardado del usuario
       if (response.status === 200) {
         setCarrito(response.data);
         
@@ -44,11 +44,11 @@ const Carrito = () => {
       const precioConDescuento = item.Price * (1 - (item.Discount || 0) / 100);
       return acc + item.Quantity * precioConDescuento;
     }, 0);
-    setTotalCost(total.toFixed(2)); // Redondear a 2 decimales
+    setTotalCost(total.toFixed(2)); // Redondea a 2 decimales
   };
 
   const handleQuantityChange = async (productId, newQuantity) => {
-    if (newQuantity <= 0) return; // Prevent negative or zero quantities
+    if (newQuantity <= 0) return; // Previene cantidad cero o negativas de un producto
   
     const updatedCart = carrito.map(item => {
       if (item.ProductID === productId) {
@@ -61,7 +61,7 @@ const Carrito = () => {
     calcularCostoTotal(updatedCart);
   
     try {
-      // Update the quantity in the database
+      // Actualiza cantidad en bbdd
       await axios.put('http://localhost:5000/api/carrito', {
         Usuarios_AccountID: usuario.UserId,
         Productos_ProductID: productId,
@@ -75,7 +75,7 @@ const Carrito = () => {
   const handleRemoveFromCart = async (productId) => {
     try {
       await axios.delete(`http://localhost:5000/api/carrito/${usuario.UserId}/${productId}`);
-      cargarCarrito(); // Recargar el carrito después de la eliminación
+      cargarCarrito(); // Recarga el carrito después de la eliminación
     } catch (error) {
       console.error('Error al eliminar el producto del carrito:', error.message);
     }
@@ -85,8 +85,8 @@ const Carrito = () => {
   const limpiarCarrito = async () => {
     try {
       await axios.delete(`http://localhost:5000/carritovaciar/${usuario.UserId}`);
-      //setCarrito([]); // Vaciar el carrito en el estado
-      //setTotalCost(0); // Reiniciar el costo total
+      //setCarrito([]); // Vacia el carrito en el estado
+      //setTotalCost(0); // Reinicia el costo total
       console.log(usuario.UserId);
     } catch (error) {
       console.error('Error al vaciar el carrito:', error.message);

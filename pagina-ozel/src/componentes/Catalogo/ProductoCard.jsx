@@ -24,7 +24,7 @@ const ProductoCard = ({ producto, onEdit }) => {
   const discountedPrice = discount > 0 ? price * (1 - discount / 100) : price;
 
   const handleCardClick = () => {
-    navigate(`/producto/${producto.ProductID}`, { state: { producto } });
+    navigate(`/producto/${producto.ProductID}`, { state: { producto } }); //navega a la pagina del producto
   };
 
   return (
@@ -51,7 +51,7 @@ const ProductoCard = ({ producto, onEdit }) => {
               alignItems="center"
               justifyContent="center"
             >
-              -{discount}%{/* Muestra el descuento corregido */}
+              -{discount}%{/* Muestra el descuento*/}
             </Box>
           )}
         </Box>

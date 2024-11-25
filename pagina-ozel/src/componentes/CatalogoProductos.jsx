@@ -21,7 +21,7 @@ const CatalogoProductos = () => {
   const [openFormDialog, setOpenFormDialog] = useState(false);
   const [formMode, setFormMode] = useState('edit');
   const [searchTerm, setSearchTerm] = useState(""); // Estado para la búsqueda
-  const [sortCriteria, setSortCriteria] = useState(''); // Estado para el criterio de ordenación
+  const [sortCriteria, setSortCriteria] = useState(''); // Estado para el criterio para ordenar los productos
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
@@ -46,7 +46,7 @@ const CatalogoProductos = () => {
     }
   };
 
-  const handleFiltroChange = (event) => {
+  const handleFiltroChange = (event) => {  //función para manejo de los filtros
     const { name, checked } = event.target;
     const [tipo, categoria, subcategoria] = name.split('.');
     setFiltros((prevFiltros) => {
@@ -72,7 +72,7 @@ const CatalogoProductos = () => {
     setSortCriteria(event.target.value);
   };
 
-  // Filtrar y ordenar productos
+  // Ordena los productos
   const productosFiltrados = filtrarProductos(productos, filtros)
     .filter((producto) => {
       const lowerSearchTerm = searchTerm.toLowerCase();

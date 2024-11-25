@@ -43,7 +43,7 @@ app.post("/create_preference", async (req, res) => {
     const preferenceData = {
       items: items,  // Lista de productos del carrito
       back_urls: {
-        success: "https://www.google.com/search?q=exito",
+        success: "https://www.google.com/search?q=exito", //no se puede usar localhost aqui asi que uso esto de prueba
         failure: "https://www.google.com/search?q=fallo",
         pending: "https://www.google.com/search?q=pendiente",
       },

@@ -7,7 +7,7 @@ const ColorModal = ({ open, onClose, onColorCreated }) => {
   const [newColor, setNewColor] = useState('');
 
   useEffect(() => {
-    const fetchColores = async () => {
+    const fetchColores = async () => { //consigue las colores para mostrar en el menu de crear nueva
       try {
         const response = await axios.get('http://localhost:3000/api/colores');
         setColores(response.data);
@@ -27,7 +27,7 @@ const ColorModal = ({ open, onClose, onColorCreated }) => {
       return;
     }
 
-    try {
+    try { //guarda el nuevo color en bbdd
       await axios.post('http://localhost:3000/api/colores', {
         color: newColor,
       });

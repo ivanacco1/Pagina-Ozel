@@ -40,7 +40,7 @@ const CatalogoProductos = () => {
     cargarFiltros();
   }, []);
 
-  const cargarProductos = async () => {
+  const cargarProductos = async () => { //endpoint para conseguir todos los productos de la bbdd
     try {
       const response = await axios.get('http://localhost:3000/api/productos');
       if (response.status === 200) {
@@ -53,7 +53,7 @@ const CatalogoProductos = () => {
     }
   };
 
-  const cargarFiltros = async () => {
+  const cargarFiltros = async () => { //carga todos los filtros existentes de la bbdd
     try {
       const [categoriasRes, coloresRes, tallasRes] = await Promise.all([
         axios.get('http://localhost:3000/api/categorias'),
@@ -65,7 +65,7 @@ const CatalogoProductos = () => {
       setColores(coloresRes.data);
       setTallas(tallasRes.data);
   
-      const categoriasFiltros = categoriasRes.data.reduce((acc, cat) => {
+      const categoriasFiltros = categoriasRes.data.reduce((acc, cat) => { //arma los filtros de forma dinámica
         if (!acc[cat.categoria]) {
           acc[cat.categoria] = {
             isChecked: false,
@@ -106,11 +106,11 @@ const CatalogoProductos = () => {
 
   };
 
-  useEffect(() => {
+ /* useEffect(() => {
     console.log('Filtros actualizados:', filtros);
-  }, [filtros]);
+  }, [filtros]);*/
 
-  const handleFiltroChange = (event) => {
+  const handleFiltroChange = (event) => { //función de la lógica de filtrado
     const { name, checked } = event.target;
     const [tipo, categoria, subcategoria] = name.split('.');
   
@@ -156,7 +156,7 @@ const CatalogoProductos = () => {
         });
       }
     } else {
-      // Actualizar color o talla
+      // Actualiza color o talla
       setFiltros((prevFiltros) => ({
         ...prevFiltros,
         [tipo]: {
@@ -171,36 +171,36 @@ const CatalogoProductos = () => {
     return productos.filter((producto) => {
       const { Category, Subcategory, Size, Color } = producto;
   
-      // Verificar filtros de categoría y subcategoría (mostrar si al menos una categoría o subcategoría coincide)
+      // Verifica filtros de categoría y subcategoría 
       const categoriaFiltro = Object.keys(filtros.categoria).some((categoria) => {
         const categoriaData = filtros.categoria[categoria];
         
-        // Verificar si la categoría o alguna subcategoría está seleccionada
+        // Verifica si la categoría o alguna subcategoría está seleccionada
         const subcategoriasSeleccionadas = Object.values(categoriaData.subcategorias).some(sub => sub.isChecked);
         
-        // Si ninguna subcategoría ni la categoría están seleccionadas, ignorar esta categoría
+        // Si ninguna subcategoría ni la categoría están seleccionadas, ignora esta categoría
         if (!categoriaData.isChecked && !subcategoriasSeleccionadas) return false;
   
-        // Si la categoría está seleccionada, verificar si coincide la categoría o alguna subcategoría
+        // Si la categoría está seleccionada, verifica si coincide la categoría o alguna subcategoría
         return (
           (categoriaData.isChecked && Category === categoria) ||
           (subcategoriasSeleccionadas && categoriaData.subcategorias[Subcategory]?.isChecked)
         );
       });
   
-      // Verificar filtros de talla (mostrar si al menos una talla coincide)
+      // Verifica filtros de talla 
       const tallaFiltro = Object.keys(filtros.talla).some((talla) => {
-        if (!filtros.talla[talla].isChecked) return false; // Si no está seleccionada, no considerarla
-        return Size === talla; // Mostrar si la talla coincide
+        if (!filtros.talla[talla].isChecked) return false; 
+        return Size === talla; 
       });
   
-      // Verificar filtros de color (mostrar si al menos un color coincide)
+      // Verifica filtros de color
       const colorFiltro = Object.keys(filtros.color).some((color) => {
-        if (!filtros.color[color].isChecked) return false; // Si no está seleccionado, no considerarlo
-        return Color === color; // Mostrar si el color coincide
+        if (!filtros.color[color].isChecked) return false; 
+        return Color === color; 
       });
   
-      // Solo aplicar filtros si hay algún filtro seleccionado, sino devolver true
+      // Si no hay filtros activos, devuelve todos los productos
       const hayFiltrosDeCategoria = Object.keys(filtros.categoria).some(cat => filtros.categoria[cat].isChecked || 
         Object.values(filtros.categoria[cat].subcategorias).some(sub => sub.isChecked));
       const hayFiltrosDeTalla = Object.values(filtros.talla).some(talla => talla.isChecked);
@@ -244,7 +244,7 @@ const CatalogoProductos = () => {
                       />
                     }
                     label={categoria.charAt(0).toUpperCase() + categoria.slice(1)}
-                    style={{ justifyContent: 'flex-start' }} // Justificar a la izquierda
+                    style={{ justifyContent: 'flex-start' }} 
                   />
                   {/* Subcategorías con dentado */}
                   <Box ml={4} style={{ display: 'flex', flexDirection: 'column' }}>
@@ -259,7 +259,7 @@ const CatalogoProductos = () => {
                           />
                         }
                         label={subcategoria.charAt(0).toUpperCase() + subcategoria.slice(1)}
-                        style={{ justifyContent: 'flex-start' }} // Justificar a la izquierda
+                        style={{ justifyContent: 'flex-start' }} 
                       />
                     ))}
                   </Box>
