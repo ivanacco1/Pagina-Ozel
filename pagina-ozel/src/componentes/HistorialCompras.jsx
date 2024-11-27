@@ -21,7 +21,7 @@ const HistorialCompras = () => {
 
   const cargarHistorialCompras = async () => {
     setLoading(true);
-    try {
+    try { //carga listado de compras de un usuario y las separa en páginas
       const response = await axios.get(`http://localhost:5000/api/usuarios/${usuario.UserId}/pedidos?page=${paginaActual}&limit=${pedidosPorPagina}`);
       if (response.status === 200) {
         const pedidosOrdenados = response.data.sort((a, b) => b.OrderID - a.OrderID);
@@ -44,8 +44,8 @@ const HistorialCompras = () => {
       if (response.status === 200) {
         console.log(response.data);
         setPedido(pedido);
-        setDetallePedido(response.data); // Guardar los detalles en el estado
-        setModalOpen(true); // Abrir el modal
+        setDetallePedido(response.data); // Guarda los detalles en el estado
+        setModalOpen(true); // Abre el modal
       } else {
         console.error('Error al cargar los detalles del pedido:', response.statusText);
       }

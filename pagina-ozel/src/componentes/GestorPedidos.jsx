@@ -39,7 +39,7 @@ const GestorPedidos = () => {
   }, []);
 
   useEffect(() => {
-    // Filtrar pedidos según los filtros de estado seleccionados
+    // Filtra pedidos según los filtros de estado seleccionados
     const nuevosPedidosFiltrados = pedidos.filter((pedido) => filters[pedido.Status]);
     setFilteredPedidos(nuevosPedidosFiltrados);
   }, [filters, pedidos]);
@@ -64,7 +64,7 @@ const GestorPedidos = () => {
     }
   };
 
-  const handleVerDetalles = async (pedido) => {
+  const handleVerDetalles = async (pedido) => { //Pide los detalles de un pedido especifico
     setLoadingDetalles(true);
     try {
       const response = await axios.get(`http://localhost:5000/api/pedidos/${pedido.OrderID}`);

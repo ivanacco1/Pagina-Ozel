@@ -16,11 +16,11 @@ const GestorCategorias = () => {
   const [tallaModalOpen, setTallaModalOpen] = useState(false);
 
   useEffect(() => {
-    cargarDatos();
+    cargarDatos(); //carga los datos cuando se abre una ventana
   }, [tabIndex, modalOpen, colorModalOpen, tallaModalOpen]);
 
 
-  const cargarDatos = async () => {
+  const cargarDatos = async () => { //llama todas las categorias para filtros
     try {
       if (tabIndex === 0) {
         const response = await axios.get('http://localhost:3000/api/categorias');
@@ -55,7 +55,7 @@ const GestorCategorias = () => {
   };
 
   const handleCategoriaCreated = () => {
-    cargarDatos();
+    cargarDatos(); //vuelve a cargar
   };
 
   return (

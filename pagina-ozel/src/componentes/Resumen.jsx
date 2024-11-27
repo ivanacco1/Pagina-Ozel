@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Grid, TextField, Button, Box, Typography, IconButton, InputAdornment } from '@mui/material';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
-import { useAuth } from './AutentificacionProvider';
+import { useAuth, verificarCamposRequeridos } from './AutentificacionProvider';
 import { ValidatePassword } from './ValidatePassword';
 import '../estilos/MiCuenta.css';
 import axios from 'axios';
 
 const Resumen = () => {
-  const { usuario, actualizarUsuario } = useAuth();
+  const { usuario, actualizarUsuario, setEstadoAdvertencia } = useAuth();
   const [selectedTab, setSelectedTab] = useState(0);
   const [historialCompras, setHistorialCompras] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -33,7 +33,7 @@ const Resumen = () => {
     setMostrarContraseña(!mostrarContraseña);
   };
 
-  useEffect(() => {
+  useEffect(() => { //carga los datos en los campos
     if (usuario) {
       setFormData({
         FirstName: usuario.FirstName,
@@ -51,7 +51,7 @@ const Resumen = () => {
     }
   }, [usuario]);
 
-  useEffect(() => {
+  useEffect(() => { //carga historial de compras
     if (usuario && usuario.Pedidos) {
       setHistorialCompras(usuario.Pedidos);
     }
@@ -145,7 +145,7 @@ const Resumen = () => {
       NewPassword: formData.NewPassword || null
     };
 
-    try {
+    try { //actualiza datos del usuario
       const response = await axios.put(`http://localhost:5000/api/usuarios/${usuario.UserId}`, updateData);
       if (response.status === 200) {
         const updatedUser = response.data;
@@ -154,6 +154,7 @@ const Resumen = () => {
         setChangePasswordMode(false);
         actualizarUsuario(updatedUser.user); // Actualiza el contexto con los nuevos datos del usuario
         console.log(updatedUser.user);
+        setEstadoAdvertencia(verificarCamposRequeridos(updatedUser.user));
       } else {
         console.error('Error al actualizar los datos:', response.statusText);
         alert('Error al actualizar los datos.');
@@ -162,6 +163,8 @@ const Resumen = () => {
       console.error('Error al actualizar los datos:', error.response.data.message);
       alert('Error al actualizar los datos: ' + error.response.data.message);
     }
+    
+   
   };
 
   if (!usuario) {

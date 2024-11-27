@@ -29,11 +29,12 @@ function Login({ isOpen, onClose }) {
       Password,
     };
 
-    try {
+    try { //endpoint para login
       const response = await axios.post('http://localhost:5000/api/usuarios/login', data);
 
       if (response.status === 200) {
         const result = response.data;
+        console.log(result);
         setLoginExitoso(true);
         setError(null);
         login(result.user, mantenerSesion);
@@ -50,11 +51,8 @@ function Login({ isOpen, onClose }) {
         }
       }
     } catch (err) {
-      if (err.response) {
-        // Error de respuesta del servidor
-        
+      if (err.response) { //ver
           setError(err.response.data.message || 'Credenciales incorrectas');
-
       } else {
         // La solicitud fue hecha pero no hubo respuesta
         setError('No se pudo conectar con el servidor. Intente nuevamente más tarde.');

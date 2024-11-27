@@ -9,8 +9,8 @@ const Home = () => {
 
   useEffect(() => {
     const cargarProductosConDescuento = async () => {
-      try {
-        const response = await axios.get('http://localhost:3000/api/productos');
+      try { //consigue listado de productos pero solo mostrará las ofertas
+        const response = await axios.get('http://localhost:3000/api/productos'); 
         if (response.status === 200) {
           const productosFiltrados = response.data.filter((producto) => producto.Discount > 0);
           setProductosConDescuento(productosFiltrados);

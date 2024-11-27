@@ -20,7 +20,7 @@ const MiCuenta = () => {
     }
   }, [usuario]);
 
-  const handleTabChange = (event, newValue) => {
+  const handleTabChange = (event, newValue) => { //manejo de epstañas dentro de la página
     setSelectedTab(newValue);
   };
 

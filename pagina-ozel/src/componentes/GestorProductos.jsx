@@ -37,7 +37,7 @@ const GestorProductos = () => {
     cargarProductos();
   }, []);
 
-  const cargarProductos = async () => {
+  const cargarProductos = async () => { //consigue toda la lista de productos
     setLoading(true);
     try {
       const response = await axios.get('http://localhost:3000/api/productos');
@@ -61,7 +61,7 @@ const GestorProductos = () => {
     return value && value.toString().toLowerCase().includes(searchTerm.toLowerCase());
   };
 
-  const handleAddProductClick = () => {
+  const handleAddProductClick = () => { //parametros de un producto
     setFormMode('add');
     setFormValues({
       ProductID: '',
@@ -75,8 +75,8 @@ const GestorProductos = () => {
       Discount: '',
       Description: '',
       Image: null,
-      SaleStart: '',
-      SaleEnd: ''
+      SaleStart: '', //estos ya no se usan por el momento
+      SaleEnd: ''    //estos ya no se usan por el momento
     });
     setOpenFormDialog(true);
   };
@@ -121,7 +121,7 @@ const GestorProductos = () => {
   };
 
   const handleFormSubmit = () => {
-    cargarProductos();
+    cargarProductos(); //recarga la lista de productos al enviar un formulario
   };
 
   const filteredProductos = productos.filter((product) =>

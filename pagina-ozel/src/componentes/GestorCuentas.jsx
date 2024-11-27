@@ -91,7 +91,7 @@ const [openPasswordDialog, setOpenPasswordDialog] = useState(false);
     setAdminPassword('');
   };
 
-  const generateRandomPassword = () => {
+  const generateRandomPassword = () => { //encriptación de contraseña
     const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+~`|}{[]:;?><,./-=";
     let password = '';
     for (let i = 0; i < 8; i++) {
@@ -171,7 +171,7 @@ const [openPasswordDialog, setOpenPasswordDialog] = useState(false);
     setOpenDeleteDialog(false);
   };
 
-  const filteredUsuarios = usuarios.filter((user) =>
+  const filteredUsuarios = usuarios.filter((user) => //filtrado de la barra de busqueda
     isValueIncluded(user.FirstName, searchTerm) ||
     isValueIncluded(user.LastName, searchTerm) ||
     isValueIncluded(user.Email, searchTerm) ||
@@ -180,13 +180,13 @@ const [openPasswordDialog, setOpenPasswordDialog] = useState(false);
   );
 
 const handleHistorialClick = (user) => {
-  setSelectedUser(user); // Guardamos el usuario seleccionado
+  setSelectedUser(user); // Guarda el usuario seleccionado
   console.log(user);
-  setOpenPasswordDialog(true); // Abrimos el modal de confirmación de contraseña
+  setOpenPasswordDialog(true); // Abre el modal de confirmación de contraseña
 };
 
   const handleCloseHistorial = () => {
-    setOpenHistorialDialog(false); // Cerramos el modal
+    setOpenHistorialDialog(false); // Cierra el modal
   };
 
   const handleConfirmPassword = async () => {
@@ -197,8 +197,8 @@ const handleHistorialClick = (user) => {
       });
       setPasswordConfirmation('');
       if (response.status === 200) {
-        setOpenPasswordDialog(false); // Cerrar el modal de contraseña
-        setOpenHistorialDialog(true); // Abrir el modal del historial
+        setOpenPasswordDialog(false); // Cierra el modal de contraseña
+        setOpenHistorialDialog(true); // Abre el modal del historial
       } else {
         alert('Contraseña incorrecta');
       }

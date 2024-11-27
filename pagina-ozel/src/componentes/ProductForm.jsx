@@ -14,13 +14,13 @@ const ProductForm = ({ open, onClose, onFormSubmit, formMode, formValues, setFor
   const [isColorModalOpen, setIsColorModalOpen] = useState(false);
   const [isTallaModalOpen, setIsTallaModalOpen] = useState(false);
 
-  useEffect(() => {
+  useEffect(() => { //consigue todas las categorias existentes
     fetchCategorias();
     fetchColores();
     fetchTallas();
   }, []);
 
-  const fetchCategorias = async () => {
+  const fetchCategorias = async () => { 
     try {
       const response = await axios.get('http://localhost:3000/api/categorias');
       const uniqueCategorias = response.data.filter(
@@ -51,7 +51,7 @@ const ProductForm = ({ open, onClose, onFormSubmit, formMode, formValues, setFor
     }
   };
 
-  const handleFormChange = (e) => {
+  const handleFormChange = (e) => { //actualiza variables a medida que cambian valores del formulario
     const { name, value } = e.target;
     setFormValues((prevValues) => ({
       ...prevValues,
@@ -59,7 +59,7 @@ const ProductForm = ({ open, onClose, onFormSubmit, formMode, formValues, setFor
     }));
   };
 
-  const handleFileChange = (e) => {
+  const handleFileChange = (e) => { //funcion para manejo de imagen
     const file = e.target.files[0];
     setFormValues((prevValues) => ({
       ...prevValues,
@@ -68,7 +68,7 @@ const ProductForm = ({ open, onClose, onFormSubmit, formMode, formValues, setFor
     setSelectedFileName(file ? file.name : '');
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async () => { //adjunta y envia datos del formulario
     try {
       const formData = new FormData();
       for (const key in formValues) {
@@ -77,7 +77,7 @@ const ProductForm = ({ open, onClose, onFormSubmit, formMode, formValues, setFor
         }
       }
 
-      if (formMode === 'add') {
+      if (formMode === 'add') { //si se está añadiendo un producto se ejecuta esto
         formData.append('DateAdded', new Date().toISOString());
         const response = await axios.post('http://localhost:3000/api/productos', formData, {
           headers: {
@@ -90,7 +90,7 @@ const ProductForm = ({ open, onClose, onFormSubmit, formMode, formValues, setFor
           console.error('Error al añadir el producto:', error.response.data.message);
           alert('Error al añadir el producto: ' + error.response.data.message);
         }
-      } else {
+      } else { //en cambio si se está modificando un producto, se ejecuta esto en su lugar
         const response = await axios.put(`http://localhost:3000/api/productos/${formValues.ProductID}`, formData, {
           headers: {
             'Content-Type': 'multipart/form-data'
@@ -113,7 +113,7 @@ const ProductForm = ({ open, onClose, onFormSubmit, formMode, formValues, setFor
   };
 
   const handleClose = () => {
-    setFormValues({
+    setFormValues({ //parametros del producto
       ProductID: '',
       ProductName: '',
       Category: '',
@@ -130,7 +130,7 @@ const ProductForm = ({ open, onClose, onFormSubmit, formMode, formValues, setFor
     onClose();
   };
 
-  const handleCategoriaSave = ({ categoria, subcategoria }) => {
+  const handleCategoriaSave = ({ categoria, subcategoria }) => { 
     setFormValues((prevValues) => ({
       ...prevValues,
       Category: categoria,

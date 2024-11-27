@@ -17,21 +17,22 @@ import Contacto from './Contacto';
 import Ayuda from './Ayuda'; 
 
 const Navegacion = () => {
-  const { usuario, estado, logout } = useAuth();
+  const { usuario, estado, logout, estadoAdvertencia } = useAuth();
   const [isRegisterModalOpen, setRegisterModalOpen] = useState(false);
   const [isLoginModalOpen, setLoginModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const navigate = useNavigate();
 
+console.log(estadoAdvertencia);
 
-  const handleSearch = () => {
+  const handleSearch = () => { //funcion de la barra de busqueda
     if (searchTerm.trim()) {
       navigate(`/catalogo?search=${encodeURIComponent(searchTerm)}`);
       setSearchTerm('');
     }
   };
 
-  return (
+  return ( //encabezado y enrutamiento de páginas
     <div>
       <div className="header">
         <div className="header-top">
@@ -79,6 +80,12 @@ const Navegacion = () => {
           </div>
         </div>
       </div>
+      {estadoAdvertencia && (
+     <div className="advertencia-perfil">
+     ⚠️ Algunos datos de tu perfil están incompletos. Por favor, actualízalos en la sección "Mi Cuenta".
+   </div>
+  )}
+
       <div style={{ marginTop: '110px' }}>
         <Routes>
           <Route path="/" element={<Home />} />

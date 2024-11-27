@@ -35,7 +35,7 @@ function Register({ isOpen, onClose }) {
       return;
     }
 
-    const data = {
+    const data = { //datos a guardar en bbdd
       nombre,
       apellido,
       correo,
@@ -52,8 +52,8 @@ function Register({ isOpen, onClose }) {
       if (response.status === 200) {
         const result = response.data;
         setRegistroExitoso(true);
-        setError(null); // Limpiar el mensaje de error si lo hay
-        login(result.user);  // Cambiar el estado a "logueado"
+        setError(null); // Limpia el mensaje de error si lo hay
+        login(result.user);  // Cambiarel estado a "logueado"
         setTimeout(() => {
           setRegistroExitoso(false);
           onClose();
@@ -71,10 +71,7 @@ function Register({ isOpen, onClose }) {
       }
     } catch (err) {
       if (err.response) {
-        // Error de respuesta del servidor
-        
           setError(err.response.data.message || 'Error al registrar la cuenta');
-
       } else {
         // La solicitud fue hecha pero no hubo respuesta
         setError('No se pudo conectar con el servidor. Intente nuevamente más tarde.');
@@ -82,7 +79,7 @@ function Register({ isOpen, onClose }) {
     }
   };
 
-  // Restablecer los campos del formulario cuando el modal se cierra
+  // Restablece los campos del formulario cuando el modal se cierra
   useEffect(() => {
     if (!isOpen) {
       setNombre('');
