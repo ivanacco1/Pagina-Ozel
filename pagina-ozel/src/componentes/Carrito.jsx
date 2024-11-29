@@ -7,7 +7,7 @@ import { initMercadoPago, Wallet } from '@mercadopago/sdk-react';
 import guardarPedido from './Carrito/GuardarPedido'; 
 
 const Carrito = () => {
-  const { usuario } = useAuth();
+  const { usuario, estadoAdvertencia } = useAuth();
   const [carrito, setCarrito] = useState([]);
   const [totalCost, setTotalCost] = useState(0);
   const [loading, setLoading] = useState(false); // Estado para la animación de "Cargando"
@@ -217,7 +217,7 @@ const Carrito = () => {
         variant="contained"
         color="primary"
         onClick={handleClickSimulate}
-        disabled={loading}
+        disabled={loading || estadoAdvertencia}
       >
         {loading ? <CircularProgress size={24} /> : 'Pagar con Mercado Pago'}
       </Button>

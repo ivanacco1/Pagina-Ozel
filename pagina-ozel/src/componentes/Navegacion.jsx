@@ -23,7 +23,7 @@ const Navegacion = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const navigate = useNavigate();
 
-console.log(estadoAdvertencia);
+//console.log(estadoAdvertencia);
 
   const handleSearch = () => { //funcion de la barra de busqueda
     if (searchTerm.trim()) {

@@ -20,11 +20,20 @@ export const AutentificacionProvider = ({ children }) => {
   useEffect(() => {
     const usuarioAlmacenado = localStorage.getItem('usuario');
     const mantenerSesion = localStorage.getItem('mantenerSesion');
-    //const camposGuardados = localStorage.getItem('camposIncompletos') === 'true';
-
+    const advertenciaGuardada = localStorage.getItem('camposIncompletos') === 'true';
+  
     if (usuarioAlmacenado && mantenerSesion === 'true') {
-      setUsuario(JSON.parse(usuarioAlmacenado));
-      setEstadoAdvertencia(verificarCamposRequeridos(usuario));
+      const usuarioData = JSON.parse(usuarioAlmacenado);
+      setUsuario(usuarioData);
+  
+      // Calcular estadoAdvertencia basado en usuario recuperado
+      const advertencia = verificarCamposRequeridos(usuarioData);
+      setEstadoAdvertencia(advertencia);
+  
+      // Opcionalmente, sincronizar advertencia guardada (si es necesario)
+      if (advertencia !== advertenciaGuardada) {
+        localStorage.setItem('camposIncompletos', advertencia);
+      }
     }
   }, []);
 
@@ -39,16 +48,18 @@ export const AutentificacionProvider = ({ children }) => {
   };*/
 
   const login = (userData, mantenerSesion) => {
+    const advertencia = verificarCamposRequeridos(userData);
     setUsuario(userData);
-    setEstadoAdvertencia(verificarCamposRequeridos(userData));
-
+    setEstadoAdvertencia(advertencia);
+  
     if (mantenerSesion) {
       localStorage.setItem('usuario', JSON.stringify(userData));
       localStorage.setItem('mantenerSesion', 'true');
-      //localStorage.setItem('camposIncompletos', camposVacíos); // Guarda la bandera en localStorage
+      localStorage.setItem('camposIncompletos', advertencia); // Guarda la bandera actualizada
     } else {
       localStorage.removeItem('usuario');
       localStorage.removeItem('mantenerSesion');
+      localStorage.removeItem('camposIncompletos');
     }
   };
 
@@ -62,10 +73,14 @@ export const AutentificacionProvider = ({ children }) => {
   };
 
   const actualizarUsuario = (updatedUserData) => {
+    const advertencia = verificarCamposRequeridos(updatedUserData);
     setUsuario(updatedUserData);
+    setEstadoAdvertencia(advertencia);
+  
     const mantenerSesion = localStorage.getItem('mantenerSesion');
     if (mantenerSesion === 'true') {
       localStorage.setItem('usuario', JSON.stringify(updatedUserData));
+      localStorage.setItem('camposIncompletos', advertencia);
     }
   };
 
