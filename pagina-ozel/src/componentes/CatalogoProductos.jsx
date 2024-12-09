@@ -86,11 +86,17 @@ const CatalogoProductos = () => {
       );
     })
     .sort((a, b) => {
+
+// Cálculo del precio con descuento
+      const precioConDescuentoA = a.Price - (a.Price * a.Discount) / 100;
+    const precioConDescuentoB = b.Price - (b.Price * b.Discount) / 100;
+        //console.log(precioConDescuentoA, "-", precioConDescuentoB);
+
       switch (sortCriteria) {
         case 'priceAsc':
-          return a.Price - b.Price;
-        case 'priceDesc':
-          return b.Price - a.Price;
+           return precioConDescuentoA - precioConDescuentoB;
+      case 'priceDesc':
+        return precioConDescuentoB - precioConDescuentoA;
         case 'dateAsc':
           return new Date(a.DateAdded) - new Date(b.DateAdded);
         case 'dateDesc':
