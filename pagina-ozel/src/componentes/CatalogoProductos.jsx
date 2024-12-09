@@ -22,6 +22,7 @@ const CatalogoProductos = () => {
   const [formMode, setFormMode] = useState('edit');
   const [searchTerm, setSearchTerm] = useState(""); // Estado para la búsqueda
   const [sortCriteria, setSortCriteria] = useState(''); // Estado para el criterio para ordenar los productos
+  const [precioRango, setPrecioRango] = useState([0, 100000]); // slider para precios
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
@@ -73,7 +74,7 @@ const CatalogoProductos = () => {
   };
 
   // Ordena los productos
-  const productosFiltrados = filtrarProductos(productos, filtros)
+  const productosFiltrados = filtrarProductos(productos, filtros, precioRango)
     .filter((producto) => {
       const lowerSearchTerm = searchTerm.toLowerCase();
       return (
@@ -106,6 +107,12 @@ const CatalogoProductos = () => {
     setFormValues(product);
     setOpenFormDialog(true);
   };
+
+  const handlePrecioChange = (event, newValue) => { //maneja slider de precios
+    setPrecioRango(newValue);
+  };
+
+
 
   return (
     <Box p={2}>
@@ -144,10 +151,14 @@ const CatalogoProductos = () => {
       <Grid container spacing={2}>
         <Grid item xs={12} sm={3} md={3} style={{ maxWidth: '250px' }}>
           <Typography variant="h6">Filtrar por</Typography>
-          <FiltrosComponentes filtros={filtros} handleFiltroChange={handleFiltroChange} />
+          <FiltrosComponentes 
+          filtros={filtros} 
+          handleFiltroChange={handleFiltroChange}
+          precioRango={precioRango}
+          handlePrecioChange={handlePrecioChange} />
         </Grid>
         <Grid item xs={12} sm={9} md={9}>
-          <Grid container spacing={2}>
+          <Grid container spacing={3}>
             {productosFiltrados.map((producto) => (
               <Grid item key={producto.id} xs={12} sm={6} md={4}>
                 <ProductoCard producto={producto} onEdit={handleEditProductClick} />

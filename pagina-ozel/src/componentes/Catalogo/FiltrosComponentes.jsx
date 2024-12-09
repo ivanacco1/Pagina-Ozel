@@ -1,7 +1,16 @@
-import React from 'react';
-import { Typography, FormControl, FormGroup, FormControlLabel, Checkbox, Box } from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import { Typography, FormControl, FormGroup, FormControlLabel, Checkbox, Box, Slider } from '@mui/material';
 
-const FiltrosComponentes = ({ filtros, handleFiltroChange }) => (
+
+
+
+
+
+
+const FiltrosComponentes = ({ filtros, handleFiltroChange, precioRango, handlePrecioChange  }) => {
+  if (!filtros) return null; // Verifica que 'filtros' esté definido
+  
+  return(
   <FormControl component="fieldset">
     <Typography variant="subtitle1">Categoría</Typography>
     <FormGroup>
@@ -45,7 +54,22 @@ const FiltrosComponentes = ({ filtros, handleFiltroChange }) => (
         />
       ))}
     </FormGroup>
+    <Box sx={{ mt: 2 }}>
+  <Typography variant="subtitle1">Filtrar por Precio</Typography>
+  <Slider
+    value={precioRango}
+    onChange={handlePrecioChange}
+    valueLabelDisplay="auto"
+    min={0} // precio mínimo 
+    max={100000} // precio máximo 
+    sx={{ width: '100%', mt: 2 }}
+  />
+  <Typography variant="body2">
+    Precio: ${precioRango[0]} - ${precioRango[1]}
+  </Typography>
+</Box>
   </FormControl>
 );
+};
 
 export default FiltrosComponentes;

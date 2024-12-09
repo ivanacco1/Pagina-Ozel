@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Grid, Typography, FormControl, FormGroup, FormControlLabel, Checkbox, Box } from '@mui/material';
-import ProductoCard from './ProductoCard'; 
+import ProductoCard from '../Catalogo/ProductoCard'; 
 import ProductForm from './ProductForm';
 import { useAuth } from './AutentificacionProvider';
 import '../estilos/Catalogo.css';

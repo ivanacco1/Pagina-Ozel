@@ -199,40 +199,50 @@ export const crear = async (req, res) => {
 
 
 
-  // Endpoint para actualizar productos
+ // Endpoint para actualizar productos
 export const actualizar = async (req, res) => {
-    const productId = req.params.id;
-    const {
-      ProductName,
-      Category,
-      Subcategory,
-      Description,
-      Price,
-      Stock,
-      Size,
-      Color,
-      Discount
-    } = req.body;
-  
-    let { SaleStart, SaleEnd } = req.body;
-  
-    // Validar si el precio es mayor o igual a 1
-    if (Price < 1) {
-      return res.status(400).json({ message: 'El precio debe ser mayor o igual a 1' });
+  const productId = req.params.id;
+  const {
+    ProductName,
+    Category,
+    Subcategory,
+    Description,
+    Price,
+    Stock,
+    Size,
+    Color,
+    Discount
+  } = req.body;
+
+  let { SaleStart, SaleEnd } = req.body;
+
+  // Validar si el precio es mayor o igual a 1
+  if (Price < 1) {
+    return res.status(400).json({ message: 'El precio debe ser mayor o igual a 1' });
+  }
+
+  const ImageURL = req.file ? `/uploads/${req.file.filename}` : null;
+
+  // Recuperar la URL de la imagen actual antes de actualizar
+  const selectQuery = 'SELECT ImageURL FROM Productos WHERE ProductID = ?';
+  db.query(selectQuery, [productId], (selectErr, selectResults) => {
+    if (selectErr) {
+      console.error('Error recuperando la URL de la imagen actual:', selectErr);
+      return res.status(500).json({ message: 'Error al recuperar la información del producto' });
     }
-  
-    const ImageURL = req.file ? `/uploads/${req.file.filename}` : null;
-    const currentDate = formatDate(new Date());
-  
-    // Asigna fecha actual si SaleStart o SaleEnd son nulos
-    //SaleStart = SaleStart ? formatDate(SaleStart) : currentDate;
-    //SaleEnd = SaleEnd ? formatDate(SaleEnd) : currentDate;
-  
+
+    if (selectResults.length === 0) {
+      return res.status(404).json({ message: 'Producto no encontrado' });
+    }
+
+    const oldImageURL = selectResults[0].ImageURL;
+
+    // Construir la consulta de actualización
     let query = `
       UPDATE Productos SET 
         ProductName = ?, Category = ?, Subcategory = ?, Description = ?, Price = ?, Stock = ?, Size = ?, Color = ?, Discount = ?
     `;
-  
+
     const values = [
       ProductName,
       Category,
@@ -244,21 +254,32 @@ export const actualizar = async (req, res) => {
       Color,
       Discount
     ];
-  
+
     if (ImageURL) {
       query += `, ImageURL = ?`;
       values.splice(9, 0, ImageURL);
-      values.splice(10, 0, productId);
-    } else values.splice(9, 0, productId);
-  
+    }
+    values.splice(9 + (ImageURL ? 1 : 0), 0, productId);
+
     query += ` WHERE ProductID = ?`;
-  
-    db.query(query, values, (err, results) => {
-      if (err) {
-        console.error('Error actualizando producto en la base de datos:', err);
+
+    // Ejecutar la consulta de actualización
+    db.query(query, values, (updateErr, results) => {
+      if (updateErr) {
+        console.error('Error actualizando producto en la base de datos:', updateErr);
         return res.status(500).json({ message: 'Error al actualizar el producto' });
       }
-  
+
+      // Eliminar la imagen antigua si se subió una nueva
+      if (ImageURL && oldImageURL) {
+        const oldImagePath = path.join(__dirname, '..', 'public', 'uploads', path.basename(oldImageURL));
+        fs.unlink(oldImagePath, unlinkErr => {
+          if (unlinkErr) {
+            console.error('Error eliminando el archivo de la imagen antigua:', unlinkErr);
+          }
+        });
+      }
+
       res.status(200).json({
         message: 'Producto actualizado correctamente',
         product: {
@@ -277,7 +298,8 @@ export const actualizar = async (req, res) => {
         }
       });
     });
-  };
+  });
+};
 
 export default {
     lista,

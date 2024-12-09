@@ -43,9 +43,12 @@ export const cargarFiltros = async (setCategorias, setColores, setTallas, setFil
   }
 };
 
-export const filtrarProductos = (productos, filtros) => { //función de la lógica de los filtros
+export const filtrarProductos = (productos, filtros, precioRango) => { //función de la lógica de los filtros
   return productos.filter((producto) => {
-    const { Category, Subcategory, Size, Color } = producto;
+    const { Category, Subcategory, Size, Color, Price } = producto;
+
+    // Filtro de precio
+    const precioFiltro = Price >= precioRango[0] && Price <= precioRango[1];
 
      // Verifica filtros de categoría y subcategoría 
     const categoriaFiltro = Object.keys(filtros.categoria).some((categoria) => {
@@ -73,6 +76,7 @@ export const filtrarProductos = (productos, filtros) => { //función de la lógi
 
      // Si no hay filtros activos, devuelve todos los productos
     return (
+      precioFiltro &&
       (!Object.values(filtros.categoria).some((cat) => cat.isChecked) || categoriaFiltro) &&
       (!Object.values(filtros.talla).some((talla) => talla.isChecked) || tallaFiltro) &&
       (!Object.values(filtros.color).some((color) => color.isChecked) || colorFiltro)
