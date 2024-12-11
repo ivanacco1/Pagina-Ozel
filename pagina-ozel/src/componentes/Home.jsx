@@ -9,10 +9,13 @@ const Home = () => {
 
   useEffect(() => {
     const cargarProductosConDescuento = async () => {
-      try { //consigue listado de productos pero solo mostrará las ofertas
+      try {
+        // Consigue listado de productos pero solo mostrará las ofertas visibles
         const response = await axios.get('http://localhost:3000/api/productos'); 
         if (response.status === 200) {
-          const productosFiltrados = response.data.filter((producto) => producto.Discount > 0);
+          const productosFiltrados = response.data.filter(
+            (producto) => producto.Discount > 0 && producto.IsHidden === 0
+          );
           setProductosConDescuento(productosFiltrados);
         }
       } catch (error) {
@@ -24,29 +27,29 @@ const Home = () => {
 
   return (
     <div>
-    <div className="home-container">
-      {/* Sección principal con imagen y texto */}
-      <div className="text-overlay">
-        <h1 className="main-title">OZEL</h1>
-        <h2 className="sub-title">moda y <br /> exclusividad</h2>
-      </div>
+      <div className="home-container">
+        {/* Sección principal con imagen y texto */}
+        <div className="text-overlay">
+          <h1 className="main-title">OZEL</h1>
+          <h2 className="sub-title">moda y <br /> exclusividad</h2>
+        </div>
       </div>
       {/* Sección de Ofertas */}
       {productosConDescuento.length > 0 && (
-  <Box className="ofertas-section" p={2} mt={4}>
-    <Typography variant="h4" component="h2" textAlign="center" sx={{ mb: 4 }}>
-      Ofertas Exclusivas
-    </Typography>
-    <Grid container spacing={2}>
-      {productosConDescuento.map((producto) => (
-        <Grid item key={producto.id} xs={12} sm={6} md={3}>
-          <ProductoCard producto={producto} />
-        </Grid>
-      ))}
-    </Grid>
-  </Box>
-)}
-      </div>
+        <Box className="ofertas-section" p={2} mt={4}>
+          <Typography variant="h4" component="h2" textAlign="center" sx={{ mb: 4 }}>
+            Ofertas Exclusivas
+          </Typography>
+          <Grid container spacing={2}>
+            {productosConDescuento.map((producto) => (
+              <Grid item key={producto.id} xs={12} sm={6} md={3}>
+                <ProductoCard producto={producto} />
+              </Grid>
+            ))}
+          </Grid>
+        </Box>
+      )}
+    </div>
   );
 };
 

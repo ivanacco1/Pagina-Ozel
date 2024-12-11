@@ -40,8 +40,12 @@ const CatalogoProductos = () => {
   const cargarProductos = async () => {
     try {
       const response = await axios.get('http://localhost:3000/api/productos');
-      if (response.status === 200) setProductos(response.data);
-      console.log(response.data);
+      if (response.status === 200) {
+        const productosVisibles = response.data.filter(producto => producto.IsHidden !== 1); // Excluye productos ocultos
+      setProductos(productosVisibles);
+      }
+        //setProductos(response.data);
+      //console.log(response.data);
     } catch (error) {
       console.error('Error al cargar la lista de productos:', error.response?.data?.message);
     }
@@ -75,6 +79,7 @@ const CatalogoProductos = () => {
 
   // Ordena los productos
   const productosFiltrados = filtrarProductos(productos, filtros, precioRango)
+  .filter((producto) => producto.IsHidden !== 1)
     .filter((producto) => {
       const lowerSearchTerm = searchTerm.toLowerCase();
       return (
