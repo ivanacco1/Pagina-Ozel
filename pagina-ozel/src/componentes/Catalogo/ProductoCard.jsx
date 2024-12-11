@@ -27,6 +27,8 @@ const ProductoCard = ({ producto, onEdit }) => {
     navigate(`/producto/${producto.ProductID}`, { state: { producto } }); //navega a la pagina del producto
   };
 
+  const isLowStock = producto.Stock <= 5; //stock reservado para que aparezca como agotado
+
   return (
     <Card>
       <CardActionArea onClick={handleCardClick}>
@@ -36,7 +38,33 @@ const ProductoCard = ({ producto, onEdit }) => {
             height="340"
             image={imageUrl}
             alt={producto.ProductName}
+            style={{
+              filter: isLowStock ? 'brightness(50%)' : 'none', // Oscurece la imagen si hay poco stock
+            }}
           />
+
+{isLowStock && (
+            <Box
+              position="absolute"
+              top="0"
+              left="0"
+              width="100%"
+              height="100%"
+              display="flex"
+              alignItems="center"
+              justifyContent="center"
+              style={{
+                backgroundColor: 'rgba(0, 0, 0, 0.5)', // Fondo oscuro semitransparente
+                color: 'darkred', // Texto en rojo
+                fontSize: '2rem',
+                fontWeight: 'bold',
+                zIndex: 1,
+              }}
+            >
+              AGOTADO
+            </Box>
+          )}
+
           {discount > 0 && (
             <Box
               position="absolute"

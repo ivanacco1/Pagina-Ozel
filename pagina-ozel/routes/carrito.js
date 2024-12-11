@@ -39,7 +39,8 @@ export const carritoUsuario = async (req, res) => {
       p.ProductID, 
       p.ProductName, 
       p.Price, 
-      p.Discount,
+      p.Discount, 
+      p.Stock,
       p.Price * (1 - (p.Discount / 100)) AS DiscountedPrice
     FROM Carrito c
     JOIN Productos p ON c.Productos_ProductID = p.ProductID

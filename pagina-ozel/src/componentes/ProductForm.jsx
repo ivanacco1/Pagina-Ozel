@@ -293,9 +293,9 @@ const ProductForm = ({ open, onClose, onFormSubmit, formMode, formValues, setFor
           Guardar
         </Button>
       </DialogActions>
-      <CategoriaModal open={isCategoriaModalOpen} onClose={() => setIsCategoriaModalOpen(false)} onSave={handleCategoriaSave} />
-      <ColorModal open={isColorModalOpen} onClose={() => setIsColorModalOpen(false)} />
-      <TallaModal open={isTallaModalOpen} onClose={() => setIsTallaModalOpen(false)} />
+      <CategoriaModal open={isCategoriaModalOpen} onClose={() => {setIsCategoriaModalOpen(false); fetchCategorias()}} onSave={handleCategoriaSave} />
+      <ColorModal open={isColorModalOpen} onClose={() => {setIsColorModalOpen(false); fetchColores()}} />
+      <TallaModal open={isTallaModalOpen} onClose={() => {setIsTallaModalOpen(false); fetchTallas()}} />
     </Dialog>
   );
 };

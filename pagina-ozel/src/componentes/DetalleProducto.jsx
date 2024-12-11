@@ -99,12 +99,33 @@ const DetalleProducto = () => {
             variant="contained" 
             color="primary" 
             style={{ marginTop: '16px' }}
+            disabled={producto.Stock <= 5}
             onClick={handleAddToCart}
           >
             Añadir al Carrito
           </Button>
         </Grid>
       </Grid>
+      <Box
+    mt={2}
+    p={2}
+    style={{
+      backgroundColor: '#f9f9f9', // Fondo claro
+      boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.1)', // Sombra suave
+      borderRadius: '8px', // Bordes redondeados
+    }}
+  >
+    <Typography
+      variant="body1"
+      align="center"
+      color="textPrimary"
+      style={{
+        fontWeight: 500,
+      }}
+    >
+      Podés modificar la cantidad de este producto directamente en tu carrito.
+    </Typography>
+  </Box>
     </Box>
   );
 };

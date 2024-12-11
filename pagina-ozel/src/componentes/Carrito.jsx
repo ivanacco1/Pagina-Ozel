@@ -189,6 +189,7 @@ const Carrito = () => {
           {item.Quantity}
           <IconButton
             onClick={() => handleQuantityChange(item.ProductID, item.Quantity + 1)}
+            disabled={item.Quantity >= item.Stock}
             style={{ outline: 'none' }}
           >
             <Add />
