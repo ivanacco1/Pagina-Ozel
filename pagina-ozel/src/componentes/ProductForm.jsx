@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Dialog, DialogTitle, DialogContent, DialogActions, Box, TextField, Button, Typography, MenuItem } from '@mui/material';
+import { Dialog, DialogTitle, DialogContent, DialogActions, Box, TextField, Button, Typography, MenuItem, Checkbox, Switch, FormControlLabel } from '@mui/material';
 import axios from 'axios';
 import CategoriaModal from './CategoriaModal';
 import ColorModal from './ColorModal';
@@ -56,6 +56,14 @@ const ProductForm = ({ open, onClose, onFormSubmit, formMode, formValues, setFor
     setFormValues((prevValues) => ({
       ...prevValues,
       [name]: value
+    }));
+  };
+
+  const handleIsHiddenChange = (e) => {
+    const { checked } = e.target;
+    setFormValues((prevValues) => ({
+      ...prevValues,
+      IsHidden: checked ? 1 : 0  // Si está marcado, se envía 1 (ocultar), si no, 0 (no ocultar)
     }));
   };
 
@@ -125,6 +133,7 @@ const ProductForm = ({ open, onClose, onFormSubmit, formMode, formValues, setFor
       Discount: '',
       Description: '',
       Image: null,
+      IsHidden: 0,
     });
     setSelectedFileName('');
     onClose();
@@ -283,6 +292,17 @@ const ProductForm = ({ open, onClose, onFormSubmit, formMode, formValues, setFor
               </Typography>
             )}
           </Box>
+
+          <FormControlLabel
+            control={
+              <Switch
+                checked={formValues.IsHidden === 1}
+                onChange={handleIsHiddenChange}
+                name="IsHidden"
+              />
+            }
+            label="Ocultar Producto"
+          />
         </Box>
       </DialogContent>
       <DialogActions>

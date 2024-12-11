@@ -131,7 +131,8 @@ export const crear = async (req, res) => {
       Stock,
       Size,
       Color,
-      Discount
+      Discount,
+      IsHidden
     } = req.body;
   
     let { SaleStart, SaleEnd } = req.body;
@@ -151,8 +152,8 @@ export const crear = async (req, res) => {
   
     const query = `
       INSERT INTO Productos (
-        ProductName, Category, Subcategory, Description, Price, Stock, ImageURL, DateAdded, Size, Color, Discount
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ProductName, Category, Subcategory, Description, Price, Stock, ImageURL, DateAdded, Size, Color, Discount, IsHidden
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
   
     const values = [
@@ -167,6 +168,7 @@ export const crear = async (req, res) => {
       Size,
       Color,
       Discount,
+      IsHidden,
       SaleStart,
       SaleEnd
     ];
@@ -191,6 +193,7 @@ export const crear = async (req, res) => {
           Discount,
           SaleStart,
           SaleEnd,
+          IsHidden,
           ImageURL: ImageURL ? `http://localhost:${PORT}${ImageURL}` : null
         }
       });
@@ -211,7 +214,8 @@ export const actualizar = async (req, res) => {
     Stock,
     Size,
     Color,
-    Discount
+    Discount,
+    IsHidden
   } = req.body;
 
   let { SaleStart, SaleEnd } = req.body;
@@ -240,7 +244,7 @@ export const actualizar = async (req, res) => {
     // Construir la consulta de actualización
     let query = `
       UPDATE Productos SET 
-        ProductName = ?, Category = ?, Subcategory = ?, Description = ?, Price = ?, Stock = ?, Size = ?, Color = ?, Discount = ?
+        ProductName = ?, Category = ?, Subcategory = ?, Description = ?, Price = ?, Stock = ?, Size = ?, Color = ?, Discount = ?, IsHidden = ?
     `;
 
     const values = [
@@ -252,17 +256,23 @@ export const actualizar = async (req, res) => {
       Stock,
       Size,
       Color,
-      Discount
+      Discount,
+      IsHidden
     ];
+
+    
 
     if (ImageURL) {
       query += `, ImageURL = ?`;
-      values.splice(9, 0, ImageURL);
+      values.splice(10, 0, ImageURL);
     }
-    values.splice(9 + (ImageURL ? 1 : 0), 0, productId);
+    values.splice(10 + (ImageURL ? 1 : 0), 0, productId);
 
     query += ` WHERE ProductID = ?`;
 
+
+    console.log(query);
+    console.log(values);
     // Ejecutar la consulta de actualización
     db.query(query, values, (updateErr, results) => {
       if (updateErr) {
@@ -294,6 +304,7 @@ export const actualizar = async (req, res) => {
           Discount,
           SaleStart,
           SaleEnd,
+          IsHidden,
           ImageURL: ImageURL ? `http://localhost:${PORT}${ImageURL}` : null
         }
       });

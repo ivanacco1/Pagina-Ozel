@@ -169,8 +169,20 @@ const GestorProductos = () => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {filteredProductos.map((product) => (
-                  <TableRow key={product.ProductID}>
+                {filteredProductos.map((product) => {
+ 
+                  // Determina el color de fondo según las condiciones
+                  const backgroundColor = product.IsHidden
+                  ? 'rgba(255, 235, 59, 0.3)' // Amarillo claro para productos ocultos
+                  : product.Stock <= 5
+                  ? 'rgba(244, 67, 54, 0.3)'  // Rojizo claro para stock bajo
+                  : 'transparent';            // Fondo transparente para otros casos
+
+
+                  return (
+                  <TableRow 
+                  key={product.ProductID} 
+                  sx={{ backgroundColor }}>
                     <TableCell>{product.ProductID}</TableCell>
                     <TableCell>{product.ProductName}</TableCell>
                     <TableCell>{product.Category}</TableCell>
@@ -198,7 +210,8 @@ const GestorProductos = () => {
                       </IconButton>
                     </TableCell>
                   </TableRow>
-                ))}
+                  );
+                })}
               </TableBody>
             </Table>
           </TableContainer>
