@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { CircularProgress, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography, TextField, Button, IconButton, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
+import { CircularProgress, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography, TextField, Button, IconButton, Checkbox, FormControlLabel, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import axios from 'axios';
@@ -8,6 +8,7 @@ import ProductForm from './ProductForm';
 import '../estilos/MiCuenta.css';
 
 const GestorProductos = () => {
+  const StockMin = 5;
   const { usuario } = useAuth();
   const [productos, setProductos] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -81,6 +82,12 @@ const GestorProductos = () => {
     setOpenFormDialog(true);
   };
 
+
+    // Estados para las casillas de verificación
+    const [showVisible, setShowVisible] = useState(true);
+    const [showOutOfStock, setShowOutOfStock] = useState(true);
+    const [showHidden, setShowHidden] = useState(true);
+
   const handleEditProductClick = (product) => {
     setFormMode('edit');
     setFormValues(product);
@@ -124,11 +131,20 @@ const GestorProductos = () => {
     cargarProductos(); //recarga la lista de productos al enviar un formulario
   };
 
-  const filteredProductos = productos.filter((product) =>
+ // Filtrar productos según las casillas
+ const filteredProductos = productos.filter((product) => {
+  const matchesSearch = 
     isValueIncluded(product.ProductName, searchTerm) ||
     isValueIncluded(product.Category, searchTerm) ||
-    isValueIncluded(product.Subcategory, searchTerm)
-  );
+    isValueIncluded(product.Subcategory, searchTerm);
+
+  const matchesVisibility = 
+    (showVisible && !product.IsHidden && product.Stock > StockMin) ||
+    (showOutOfStock && product.Stock <= StockMin && !product.IsHidden) ||
+    (showHidden && product.IsHidden);
+
+  return matchesSearch && matchesVisibility;
+});
 
   
 
@@ -146,6 +162,36 @@ const GestorProductos = () => {
         value={searchTerm}
         onChange={handleSearchChange}
       />
+
+<div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '16px' }}>
+        <FormControlLabel
+          control={
+            <Checkbox
+              checked={showVisible}
+              onChange={() => setShowVisible(!showVisible)}
+            />
+          }
+          label="Visibles"
+        />
+        <FormControlLabel
+          control={
+            <Checkbox
+              checked={showOutOfStock}
+              onChange={() => setShowOutOfStock(!showOutOfStock)}
+            />
+          }
+          label="Agotados"
+        />
+        <FormControlLabel
+          control={
+            <Checkbox
+              checked={showHidden}
+              onChange={() => setShowHidden(!showHidden)}
+            />
+          }
+          label="Ocultos"
+        />
+      </div>
       {loading ? (
         <CircularProgress />
       ) : (

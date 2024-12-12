@@ -89,7 +89,42 @@ export const nuevoPedido = async (req, res) => {
                   return res.status(500).json({ message: 'Error al guardar los productos del pedido' });
               }
 
-              res.status(200).json({ message: 'Pedido y productos guardados con éxito', OrderID: orderId });
+
+                              // Actualizar el stock de los productos después de insertarlos en el pedido
+              const updateStockPromises = Productos.map(p => {
+                return new Promise((resolve, reject) => {
+                    const queryUpdateStock = `
+                        UPDATE Productos 
+                        SET Stock = Stock - ? 
+                        WHERE ProductID = ? AND Stock >= ?
+                    `;
+                    db.query(queryUpdateStock, [p.Quantity, p.ProductID, p.Quantity], (err, result) => {
+                        if (err) {
+                            console.error(`Error al actualizar el stock del producto ${p.ProductID}:`, err);
+                            reject(err);
+                        } else if (result.affectedRows === 0) {
+                            console.error(`Stock insuficiente para el producto ${p.ProductID}`);
+                            reject(new Error(`Stock insuficiente para el producto ${p.ProductID}`));
+                        } else {
+                            resolve();
+                        }
+                    });
+                });
+            });
+
+
+
+              //res.status(200).json({ message: 'Pedido y productos guardados con éxito', OrderID: orderId });
+
+                           // Ejecutar todas las actualizaciones de stock y manejar errores
+                           Promise.all(updateStockPromises)
+                           .then(() => {
+                               res.status(200).json({ message: 'Pedido, productos y stock actualizados con éxito', OrderID: orderId });
+                           })
+                           .catch(err => {
+                               console.error('Error al actualizar el stock:', err);
+                               res.status(500).json({ message: 'Error al actualizar el stock de los productos' });
+                           });
           });
       } else {
           // Si no hay productos, solo responder con el éxito del pedido
@@ -143,9 +178,10 @@ export const estadosPedidos = async (req, res) => {
   const orderId = req.params.orderId;
   const { status } = req.body;
 
-  const query = 'UPDATE Pedidos SET Status = ? WHERE OrderID = ?';
+  // Consulta para actualizar el estado del pedido
+  const queryUpdateStatus = 'UPDATE Pedidos SET Status = ? WHERE OrderID = ?';
 
-  db.query(query, [status, orderId], (err, result) => {
+  db.query(queryUpdateStatus, [status, orderId], (err, result) => {
     if (err) {
       return res.status(500).json({ error: 'Error al actualizar el estado del pedido' });
     }
@@ -154,7 +190,57 @@ export const estadosPedidos = async (req, res) => {
       return res.status(404).json({ error: 'Pedido no encontrado' });
     }
 
-    res.status(200).json({ message: 'Estado del pedido actualizado correctamente' });
+    // Si el estado se cambia a "Cancelado", devolver los productos al stock
+    if (status === 'Cancelado') {
+      const queryGetProductos = `
+        SELECT Productos_ProductID, Quantity 
+        FROM PedidosProductos 
+        WHERE OrderID = ?
+      `;
+
+      db.query(queryGetProductos, [orderId], (err, productos) => {
+        if (err) {
+          console.error('Error al recuperar productos del pedido:', err);
+          return res.status(500).json({ error: 'Error al recuperar productos del pedido' });
+        }
+
+        if (productos.length > 0) {
+          // Crear promesas para actualizar el stock de cada producto
+          const updateStockPromises = productos.map((producto) => {
+            return new Promise((resolve, reject) => {
+              const queryUpdateStock = `
+                UPDATE Productos 
+                SET Stock = Stock + ? 
+                WHERE ProductID = ?
+              `;
+              db.query(queryUpdateStock, [producto.Quantity, producto.Productos_ProductID], (err, result) => {
+                if (err) {
+                  console.error(`Error al actualizar el stock del producto ${producto.Productos_ProductID}:`, err);
+                  reject(err);
+                } else {
+                  resolve();
+                }
+              });
+            });
+          });
+
+          // Ejecutar todas las promesas
+          Promise.all(updateStockPromises)
+            .then(() => {
+              res.status(200).json({ message: 'Estado del pedido actualizado y stock restaurado correctamente' });
+            })
+            .catch((err) => {
+              console.error('Error al restaurar el stock:', err);
+              res.status(500).json({ error: 'Error al restaurar el stock de los productos' });
+            });
+        } else {
+          res.status(200).json({ message: 'Estado del pedido actualizado correctamente, pero no se encontraron productos para restaurar stock' });
+        }
+      });
+    } else {
+      // Si el estado no es "Cancelado", simplemente responder con éxito
+      res.status(200).json({ message: 'Estado del pedido actualizado correctamente' });
+    }
   });
 };
 

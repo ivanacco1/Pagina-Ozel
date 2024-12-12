@@ -133,11 +133,24 @@ const Carrito = () => {
   // Función para simular el clic en el botón de Wallet
   const handleClickSimulate = () => {
     setLoading(true); // Mostrar animación de "Cargando"
+
+    const tryClick = () => {
+      if (walletButtonRef.current) {
+        const walletButton = walletButtonRef.current.querySelector('button');
+        if (walletButton) {
+          walletButton.click(); // Simula el clic en el botón del Wallet
+          setLoading(false); // Ocultar animación de "Cargando" al completar
+          return;
+        }
+      }
+    };
+
     if (walletButtonRef.current) {
       const walletButton = walletButtonRef.current.querySelector('button');
       if (walletButton) {
         walletButton.click(); // Simula el clic en el botón del Wallet
       }
+      else setTimeout(tryClick, 2000);
     }
   };
 
