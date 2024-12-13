@@ -3,6 +3,7 @@ import { useLocation } from 'react-router-dom';
 import axios from 'axios';
 import { Box, Typography, Button, Grid } from '@mui/material';
 import { useAuth } from './AutentificacionProvider'; 
+import { StockMin } from './Constantes';
 
 const DetalleProducto = () => {
   const location = useLocation();
@@ -99,11 +100,20 @@ const DetalleProducto = () => {
             variant="contained" 
             color="primary" 
             style={{ marginTop: '16px' }}
-            disabled={producto.Stock <= 5}
+            disabled={producto.Stock <= StockMin}
             onClick={handleAddToCart}
           >
             Añadir al Carrito
           </Button>
+          {producto.Stock <= StockMin && (
+            <Typography 
+              variant="body2" 
+              color="red" 
+              style={{ marginTop: '8px', fontWeight: 'bold', fontSize: '20px' }}
+            >
+              Agotado
+            </Typography>
+          )}
         </Grid>
       </Grid>
       <Box

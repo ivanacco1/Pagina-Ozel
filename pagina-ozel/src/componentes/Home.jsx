@@ -3,6 +3,7 @@ import { Typography, Grid, Box } from '@mui/material';
 import ProductoCard from './Catalogo/ProductoCard';
 import axios from 'axios';
 import '../estilos/Home.css';
+import { StockMin } from './Constantes';
 
 const Home = () => {
   const [productosConDescuento, setProductosConDescuento] = useState([]);
@@ -14,7 +15,10 @@ const Home = () => {
         const response = await axios.get('http://localhost:3000/api/productos'); 
         if (response.status === 200) {
           const productosFiltrados = response.data.filter(
-            (producto) => producto.Discount > 0 && producto.IsHidden === 0
+            (producto) => 
+              producto.Discount > 0 && 
+            producto.IsHidden === 0 &&
+            producto.Stock > StockMin
           );
           setProductosConDescuento(productosFiltrados);
         }

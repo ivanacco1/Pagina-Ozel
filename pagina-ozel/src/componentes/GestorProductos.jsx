@@ -6,9 +6,10 @@ import axios from 'axios';
 import { useAuth } from './AutentificacionProvider';
 import ProductForm from './ProductForm';
 import '../estilos/MiCuenta.css';
+import { StockMin } from './Constantes';
 
 const GestorProductos = () => {
-  const StockMin = 5;
+  //const StockMin = 5;
   const { usuario } = useAuth();
   const [productos, setProductos] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -220,7 +221,7 @@ const GestorProductos = () => {
                   // Determina el color de fondo según las condiciones
                   const backgroundColor = product.IsHidden
                   ? 'rgba(255, 235, 59, 0.3)' // Amarillo claro para productos ocultos
-                  : product.Stock <= 5
+                  : product.Stock <= StockMin
                   ? 'rgba(244, 67, 54, 0.3)'  // Rojizo claro para stock bajo
                   : 'transparent';            // Fondo transparente para otros casos
 

@@ -1,0 +1,1 @@
+export const StockMin = 5; //Stock minimo, si hay menos stock que este valor, muestra al productocomo Agorado

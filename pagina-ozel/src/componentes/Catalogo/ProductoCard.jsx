@@ -4,6 +4,7 @@ import { Card, CardContent, CardMedia, Typography, CardActionArea, IconButton, B
 import EditIcon from '@mui/icons-material/Edit';
 import { useAuth } from '../AutentificacionProvider';
 import { useNavigate } from 'react-router-dom';
+import { StockMin } from '../Constantes';
 
 const ProductoCard = ({ producto, onEdit }) => {
   const { usuario } = useAuth();
@@ -27,7 +28,7 @@ const ProductoCard = ({ producto, onEdit }) => {
     navigate(`/producto/${producto.ProductID}`, { state: { producto } }); //navega a la pagina del producto
   };
 
-  const isLowStock = producto.Stock <= 5; //stock reservado para que aparezca como agotado
+  const isLowStock = producto.Stock <= StockMin; //stock reservado para que aparezca como agotado
 
   return (
     <Card>
