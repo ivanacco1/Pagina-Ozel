@@ -60,8 +60,10 @@ const DetalleProducto = () => {
             style={{ 
               width: '100%', 
               height: 'auto', 
+              maxHeight: '65vh',
               maxWidth: '32vw', 
               marginLeft: '40px',
+              objectFit: 'contain',
             }} 
           />
         </Grid>
